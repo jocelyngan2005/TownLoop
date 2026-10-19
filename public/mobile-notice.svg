@@ -1,0 +1,107 @@
+<svg width="800" height="540" viewBox="0 0 800 540"
+  fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Soft background shape -->
+  <path d="M111 427C58 371 62 276 111 217C156 163 222 151 281 110C349 63 444 47 526 76C613 107 679 183 704 271C728 355 694 439 620 472C551 503 469 473 395 474C291 475 176 497 111 427Z"
+    fill="#F1FAF3"/>
+
+  <!-- Sun accent -->
+  <circle cx="620" cy="131" r="35" fill="#FFD76A"/>
+  <path d="M620 80V61M620 201V182M569 131H550M690 131H671M584 95L570 81M670 181L656 167M656 95L670 81"
+    stroke="#C25C14" stroke-width="3" stroke-linecap="round"/>
+
+  <!-- Desktop browser -->
+  <rect x="106" y="147" width="380" height="247" rx="13"
+    fill="#FFFFFF" stroke="#10281D" stroke-width="3"/>
+  <path d="M106 160C106 153 112 147 119 147H473C480 147 486 153 486 160V183H106V160Z"
+    fill="#0F3022"/>
+  <circle cx="127" cy="165" r="5" fill="#FF8A72"/>
+  <circle cx="145" cy="165" r="5" fill="#FFD76A"/>
+  <circle cx="163" cy="165" r="5" fill="#F08A3E"/>
+
+  <!-- Simplified desktop content -->
+  <rect x="132" y="208" width="124" height="128" rx="8" fill="#F1FAF3"/>
+  <path d="M151 310C165 272 182 284 196 246C208 272 221 275 239 310V321H151V310Z"
+    fill="#0F3022"/>
+  <circle cx="197" cy="235" r="18" fill="#FFD76A"/>
+  <rect x="281" y="211" width="166" height="15" rx="7.5" fill="#D6E8DC"/>
+  <rect x="281" y="241" width="132" height="11" rx="5.5" fill="#D6E8DC"/>
+  <rect x="281" y="263" width="151" height="11" rx="5.5" fill="#D6E8DC"/>
+  <rect x="281" y="297" width="84" height="28" rx="14" fill="#F08A3E"/>
+
+  <!-- Browser stand -->
+  <path d="M265 394L250 432H342L327 394H265Z"
+    fill="#D6E8DC" stroke="#10281D" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M225 433H367" stroke="#10281D" stroke-width="4" stroke-linecap="round"/>
+
+  <!-- Curved directional arrow -->
+  <path d="M449 270C505 226 558 222 604 247"
+    stroke="#C25C14" stroke-width="7" stroke-linecap="round"
+    stroke-dasharray="2 16"/>
+  <path d="M584 225L611 252L576 260"
+    stroke="#C25C14" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Phone shadow -->
+  <ellipse cx="618" cy="470" rx="91" ry="14" fill="#D6E8DC"/>
+
+  <!-- Phone -->
+  <rect x="551" y="193" width="132" height="267" rx="25"
+    fill="#10281D"/>
+  <rect x="558" y="201" width="118" height="250" rx="19"
+    fill="#FFFFFF"/>
+  <rect x="595" y="207" width="44" height="6" rx="3"
+    fill="#10281D"/>
+
+  <!-- Mobile header -->
+  <path d="M558 220C558 209 567 201 577 201H657C668 201 676 209 676 220V264H558V220Z"
+    fill="#0F3022"/>
+  <circle cx="580" cy="237" r="9" fill="#FFD76A"/>
+  <path d="M653 232H665M653 238H665M653 244H665"
+    stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+
+  <!-- Mobile card -->
+  <rect x="570" y="278" width="94" height="78" rx="12" fill="#F1FAF3"/>
+  <circle cx="594" cy="304" r="14" fill="#FF8A72"/>
+  <path d="M583 330C588 319 600 316 606 330"
+    stroke="#D9472F" stroke-width="4" stroke-linecap="round"/>
+  <rect x="616" y="296" width="37" height="7" rx="3.5" fill="#0F3022"/>
+  <rect x="616" y="311" width="28" height="6" rx="3" fill="#A9C7B4"/>
+
+  <!-- Mobile navigation tiles -->
+  <rect x="570" y="369" width="27" height="29" rx="7" fill="#FFD76A"/>
+  <rect x="604" y="369" width="27" height="29" rx="7" fill="#F08A3E"/>
+  <rect x="638" y="369" width="26" height="29" rx="7" fill="#FF8A72"/>
+  <path d="M580 384L585 389L592 379"
+    stroke="#0F3022" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="617.5" cy="383.5" r="5" stroke="#10281D" stroke-width="2"/>
+  <path d="M645 384H657M651 378V390"
+    stroke="#10281D" stroke-width="2" stroke-linecap="round"/>
+
+  <!-- Home indicator -->
+  <rect x="598" y="435" width="38" height="4" rx="2" fill="#10281D"/>
+
+  <!-- Left plant -->
+  <path d="M76 465C77 418 84 382 106 350C111 389 100 427 76 465Z"
+    fill="#0F3022"/>
+  <path d="M91 466C101 418 123 391 151 372C149 413 126 449 91 466Z"
+    fill="#F08A3E"/>
+  <path d="M73 466C62 427 48 405 27 386C27 424 42 452 73 466Z"
+    fill="#FF8A72"/>
+  <path d="M49 466C45 439 45 419 53 398"
+    stroke="#10281D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M77 466C81 423 90 391 106 361"
+    stroke="#10281D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M91 466C106 429 123 402 145 383"
+    stroke="#10281D" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M48 457H109L101 495H57L48 457Z"
+    fill="#FFD76A" stroke="#10281D" stroke-width="3" stroke-linejoin="round"/>
+
+  <!-- Small decorative elements -->
+  <path d="M467 101L474 119L493 120L478 132L483 151L467 141L451 151L456 132L441 120L460 119L467 101Z"
+    fill="#FF8A72"/>
+  <circle cx="724" cy="329" r="9" fill="#F08A3E"/>
+  <circle cx="733" cy="366" r="5" fill="#0F3022"/>
+
+  <!-- Ground -->
+  <path d="M44 496H744" stroke="#10281D" stroke-width="4" stroke-linecap="round"/>
+</svg>

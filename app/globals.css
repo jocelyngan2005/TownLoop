@@ -2,25 +2,41 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #10281d;
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --font-sans: var(--font-poppins);
+  --font-mono: var(--font-poppins);
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --color-leaf-50: #f1faf3;
+  --color-leaf-100: #dff2e4;
+  --color-leaf-200: #bfe6cb;
+  --color-leaf-300: #92d6ab;
+  --color-leaf-400: #5bbd85;
+  --color-leaf-500: #2f9d63;
+  --color-leaf-600: #1f7e4e;
+  --color-leaf-700: #1a6340;
+  --color-leaf-800: #184d34;
+  --color-leaf-900: #0f3022;
+
+  --color-clay-400: #ff8a72;
+  --color-clay-500: #f2604c;
+  --color-clay-600: #d9472f;
+
+  --color-sun-300: #ffd76a;
+  --color-sun-400: #fbc02d;
+
+  --color-orchard-400: #f08a3e;
+  --color-orchard-500: #e2721f;
+  --color-orchard-600: #c25c14;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-poppins), system-ui, sans-serif;
+  -webkit-tap-highlight-color: transparent;
 }
