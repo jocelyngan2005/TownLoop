@@ -2,6 +2,7 @@ import Image from "next/image";
 
 import { BellIcon } from "@/app/components/icons";
 import { FullscreenNavigation } from "@/app/components/home/fullscreen-navigation";
+import { PlantView } from "@/app/components/home/plant-view";
 import { TimeGreeting } from "@/app/components/home/time-greeting";
 import type { LevelSummary, Resident } from "@/lib/home-data";
 
@@ -73,9 +74,7 @@ export function GreetingHeader({
               <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-leaf-800 backdrop-blur">
                 {resident.block}
               </span>
-              <span className="rounded-full bg-leaf-800 px-3 py-1 text-xs font-semibold text-leaf-100">
-                Level {level.level} · {level.levelName}
-              </span>
+              <PlantView level={level} />
             </div>
           )}
         </div>

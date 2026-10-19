@@ -5,11 +5,13 @@ import { getBin, verdictMeta, type ItemMatch } from "@/lib/scan-data";
 
 export function ItemVerdict({
   match,
-  onRescan,
+  onAddAndScan,
+  onRemove,
   onContinueToBin,
 }: {
   match: ItemMatch;
-  onRescan: () => void;
+  onAddAndScan: () => void;
+  onRemove: () => void;
   onContinueToBin: () => void;
 }) {
   const { item, confidence } = match;
@@ -94,18 +96,25 @@ export function ItemVerdict({
       <div className="mt-4 grid grid-cols-2 gap-2">
         <button
           type="button"
-          onClick={onRescan}
-          className="rounded-full bg-leaf-50 py-3 text-xs font-semibold text-leaf-900 transition active:scale-[0.98]"
+          onClick={onAddAndScan}
+          className="rounded-full border border-leaf-800 bg-transparent px-2 py-3 text-[11px] font-semibold leading-tight text-leaf-900 transition active:scale-[0.98]"
         >
-          Scan another item
+          Add and scan another item
+        </button>
+        <button
+          type="button"
+          onClick={onRemove}
+          className="rounded-full bg-clay-600 px-2 py-3 text-[11px] font-semibold leading-tight text-white transition active:scale-[0.98]"
+        >
+          Remove item
         </button>
         <button
           type="button"
           onClick={onContinueToBin}
-          className="inline-flex items-center justify-center gap-1.5 rounded-full bg-leaf-800 py-3 text-xs font-semibold text-white transition active:scale-[0.98]"
+          className="col-span-2 inline-flex items-center justify-center gap-1 rounded-full bg-leaf-800 px-2 py-3 text-[11px] font-semibold leading-tight text-white transition active:scale-[0.98]"
         >
-          <QrCodeIcon className="h-4 w-4" />
-          I&apos;m at the bin
+          <QrCodeIcon className="h-3.5 w-3.5 shrink-0" />
+          I&apos;m at bin
         </button>
       </div>
     </section>

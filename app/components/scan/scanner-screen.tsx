@@ -47,10 +47,10 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   const [match, setMatch] = useState<ItemMatch | null>(null);
   const [checkIn, setCheckIn] = useState<BinCheckIn | null>(null);
   const [seenIds, setSeenIds] = useState<string[]>([]);
+  const [recordedItems, setRecordedItems] = useState<ItemMatch[]>([]);
   const [sessionPoints, setSessionPoints] = useState(0);
   const [manualCode, setManualCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
-  const [detectorSupported, setDetectorSupported] = useState(true);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisTimeout = useRef<number | null>(null);
@@ -159,7 +159,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
       setCodeError(null);
       navigator.vibrate?.(40);
 
-      const item = match?.item ?? null;
+      const item = match?.item ?? recordedItems.at(-1)?.item ?? null;
 
       if (!item) {
         setCheckIn({ bin, item: null, outcome: "no-item", awardedPoints: 0 });
@@ -173,6 +173,12 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
         setSessionPoints((current) => current + awardedPoints);
         // The item is dropped off now, so it cannot be scored a second time.
         setMatch(null);
+        setRecordedItems((current) => {
+          const index = current.findIndex((entry) => entry.item.id === item.id);
+          return index < 0
+            ? current
+            : current.filter((_, entryIndex) => entryIndex !== index);
+        });
       }
 
       setCheckIn({
@@ -182,7 +188,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
         awardedPoints,
       });
     },
-    [match],
+    [match, recordedItems],
   );
 
   useEffect(() => {
@@ -206,7 +212,6 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
         } catch {
           stopped = true;
           window.clearInterval(interval);
-          setDetectorSupported(false);
           return;
         }
       }
@@ -242,6 +247,11 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
     setMatch(null);
     setCapturedImage(null);
     setAnalysing(false);
+  }
+
+  function recordMatch() {
+    if (!match) return;
+    setRecordedItems((current) => [...current, match]);
   }
 
   return (
@@ -334,8 +344,14 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
               {match ? (
                 <ItemVerdict
                   match={match}
-                  onRescan={resetItem}
+                  onAddAndScan={() => {
+                    recordMatch();
+                    resetItem();
+                  }}
+                  onRemove={resetItem}
                   onContinueToBin={() => {
+                    recordMatch();
+                    resetItem();
                     setModeOverride("qr");
                     setCheckIn(null);
                     setCodeError(null);
@@ -406,6 +422,27 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
                 />
               ) : (
                 <>
+                  {recordedItems.length > 0 && (
+                    <div className="rounded-2xl bg-leaf-50 px-3 py-2.5">
+                      <p className="text-xs font-semibold text-leaf-900">
+                        Recorded items ({recordedItems.length})
+                      </p>
+                      <ul className="mt-2 space-y-1.5">
+                        {recordedItems.map(({ item }, index) => (
+                          <li
+                            key={`${item.id}-${index}`}
+                            className="flex items-center justify-between gap-3 text-xs text-leaf-800"
+                          >
+                            <span className="truncate">{item.name}</span>
+                            <span className="shrink-0 text-[10px] text-leaf-700/65">
+                              {item.points > 0 ? `+${item.points} pts` : "No points"}
+                            </span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
                   {match && (
                     <p className="rounded-2xl bg-leaf-50 px-3 py-2.5 text-xs leading-relaxed text-leaf-800">
                       Carrying{" "}
@@ -417,15 +454,8 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
                     </p>
                   )}
 
-                  {cameraReady && !detectorSupported && (
-                    <p className="rounded-2xl bg-sun-300/25 px-3 py-2.5 text-xs leading-relaxed text-leaf-900">
-                      This browser cannot read QR codes from the camera. Type the
-                      code printed under the sticker instead.
-                    </p>
-                  )}
-
                   <details
-                    open={cameraBlocked || !detectorSupported || Boolean(codeError)}
+                    open={cameraBlocked || Boolean(codeError)}
                     className="rounded-3xl bg-leaf-50 p-4"
                   >
                     <summary className="cursor-pointer text-sm font-semibold text-leaf-900">
