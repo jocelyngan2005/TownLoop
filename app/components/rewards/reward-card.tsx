@@ -14,7 +14,7 @@ export function RewardCard({
   const missingPoints = reward.costPoints - points;
 
   return (
-    <li className="py-4">
+    <li className="motion-card py-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <p className="text-[11px] font-medium uppercase tracking-wide text-orchard-500">
@@ -27,21 +27,15 @@ export function RewardCard({
             {reward.description}
           </p>
         </div>
-        <span className="shrink-0 rounded-2xl bg-leaf-50 px-3 py-2 text-center">
-          <span className="block text-sm font-bold leading-tight text-leaf-900">
-            {reward.value}
-          </span>
-          <span className="block text-[10px] text-leaf-700/70">value</span>
-        </span>
       </div>
 
       <div className="mt-3 flex items-center justify-between gap-3">
         <div>
-          <p className="inline-flex items-center gap-1.5 text-sm font-semibold text-leaf-900">
+          <p className="mb-2 inline-flex items-center gap-1.5 rounded-full border border-leaf-200 px-3 py-1.5 text-sm font-semibold text-leaf-900">
             <CoinIcon className="h-4 w-4 text-sun-400" />
             {reward.costPoints.toLocaleString()} pts
           </p>
-          <p className="mt-0.5 text-[10px] text-leaf-700/65">
+          <p className="text-[10px] text-leaf-700/65">
             {reward.stock} left · valid {reward.validityDays} days
           </p>
         </div>

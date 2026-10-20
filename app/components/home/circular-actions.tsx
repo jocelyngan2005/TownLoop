@@ -22,7 +22,7 @@ export function CircularActionsSection({
 
   return (
     <Section title="Circular actions">
-      <div className="rounded-3xl bg-white p-4 ring-1 ring-leaf-100">
+      <div className="rounded-3xl bg-white p-4 shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)] ring-1 ring-leaf-100">
         <ul className="grid grid-cols-2">
           {items.map(({ value, label, Icon }, index) => (
             <li

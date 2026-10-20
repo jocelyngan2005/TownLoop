@@ -9,7 +9,7 @@ export function PersonalInsights({ insights }: { insights: Insight[] }) {
 
   return (
     <Section title="Insights for you">
-      <div className="rounded-3xl bg-sun-300 p-4">
+      <div className="rounded-3xl bg-sun-300 p-4 shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)]">
         <SparkIcon className="h-5 w-5 text-leaf-900" />
         <ul className="mt-2 divide-y divide-leaf-900/15">
           {insights.map((insight) => (

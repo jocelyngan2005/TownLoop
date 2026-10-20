@@ -51,7 +51,7 @@ export function TakeBackCampaigns({
         </ul>
       </nav>
 
-      <ul className="divide-y divide-leaf-200 px-5">
+      <ul className="motion-stagger divide-y divide-leaf-200 px-5">
         {visibleBrands.map((brand) => (
           <TakeBackBrandCard key={brand.id} brand={brand} />
         ))}

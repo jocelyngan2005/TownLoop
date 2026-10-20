@@ -6,7 +6,7 @@ export default function DropOffPage() {
     <>
       <DesktopNotice />
 
-      <div className="mx-auto w-full max-w-md flex-1 bg-background md:hidden">
+      <div className="motion-shell mx-auto w-full max-w-md flex-1 bg-background md:hidden">
         <DropOffScreen />
       </div>
     </>

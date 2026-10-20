@@ -33,7 +33,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-3xl bg-white p-4 shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)] ring-1 ring-leaf-100 ${className}`}
+      className={`motion-card rounded-3xl bg-white p-4 shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)] ring-1 ring-leaf-100 ${className}`}
     >
       {children}
     </div>

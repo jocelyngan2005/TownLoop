@@ -9,7 +9,7 @@ export default function RewardsPage() {
     <>
       <DesktopNotice />
 
-      <div className="mx-auto flex w-full max-w-md flex-1 flex-col bg-background pb-12 md:hidden">
+      <div className="motion-shell mx-auto flex w-full max-w-md flex-1 flex-col bg-background pb-12 md:hidden">
         <GreetingHeader resident={resident} title="Rewards" showImage={false} />
 
         <RewardsScreen

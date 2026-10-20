@@ -57,15 +57,9 @@ export function GoalsAndStreaks({ goals }: { goals: Goals }) {
             </p>
           </div>
           <ul className="flex flex-wrap gap-2">
-            {goals.badges.map((badge) => (
+            {goals.badges.filter((badge) => badge.earned).map((badge) => (
               <li key={badge.id} title={badge.description}>
-                <span
-                  className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-medium ${
-                    badge.earned
-                      ? "bg-sun-300/40 text-leaf-900"
-                      : "bg-leaf-50 text-leaf-700/55"
-                  }`}
-                >
+                <span className="inline-flex items-center gap-1.5 rounded-full bg-sun-300 px-3 py-1.5 text-[11px] font-medium text-leaf-900">
                   <TrophyIcon className="h-3.5 w-3.5" />
                   {badge.name}
                 </span>

@@ -17,7 +17,7 @@ const iconFor = {
 } as const;
 
 const tileClassName =
-  "flex h-full w-full flex-col gap-2 rounded-2xl bg-white p-3.5 text-left ring-1 ring-leaf-100 transition active:scale-[0.98]";
+  "motion-tile flex h-full w-full flex-col gap-2 rounded-2xl bg-white p-3.5 text-left ring-1 ring-leaf-100 transition active:scale-[0.98]";
 
 export function QuickActions({ actions }: { actions: QuickAction[] }) {
   return (

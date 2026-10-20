@@ -16,7 +16,7 @@ export function CommunityLeaderboardCard({
     <Section title="Community leaderboard">
       <div
         aria-label={`Ranked ${ranking.rank} of ${ranking.communitySize} community members, in the top ${topPercent} percent`}
-        className="rounded-3xl bg-orchard-500 p-4 text-white shadow-[0_12px_24px_-18px_rgba(16,40,29,0.7)]"
+        className="rounded-3xl bg-orchard-500 p-4 text-white shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)]"
       >
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
