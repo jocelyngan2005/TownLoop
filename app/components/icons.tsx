@@ -17,6 +17,20 @@ export function MenuIcon({ className = base }: IconProps) {
   );
 }
 
+export function InfinityIcon({ className = base }: IconProps) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden className={className}>
+      <path
+        d="M7.5 7.5c-2.2 0-4 2-4 4.5s1.8 4.5 4 4.5c3.2 0 5.8-9 9-9 2.2 0 4 2 4 4.5s-1.8 4.5-4 4.5c-3.2 0-5.8-9-9-9Z"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function CloseIcon({ className = base }: IconProps) {
   return (
     <svg viewBox="0 0 24 24" fill="none" aria-hidden className={className}>

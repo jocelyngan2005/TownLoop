@@ -317,9 +317,13 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
         </div>
       </div>
 
-      <div className="relative z-10 mt-auto max-h-[55%] shrink-0 overflow-y-auto overscroll-contain bg-gradient-to-t from-black/90 via-black/70 to-transparent px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-6">
+      <div className="relative z-10 mt-auto max-h-[55%] shrink-0 overflow-y-auto overscroll-contain rounded-t-[1.75rem] bg-white px-5 pb-[max(1rem,env(safe-area-inset-bottom))] pt-1 shadow-[0_-10px_30px_-18px_rgba(16,40,29,0.8)]">
+        <span
+          aria-hidden
+          className="mx-auto mb-3 block h-1 w-10 rounded-full bg-leaf-200"
+        />
         <div className="mx-auto flex w-full max-w-md flex-col gap-3">
-          <p role="status" className="text-center text-xs font-medium leading-relaxed text-white">
+          <p role="status" className="text-center text-xs font-medium leading-relaxed text-leaf-800">
             {analysing
               ? "Analysing the capture..."
               : mode === "item"

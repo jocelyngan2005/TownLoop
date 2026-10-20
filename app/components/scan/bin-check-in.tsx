@@ -28,10 +28,7 @@ export function BinCheckIn({
   const correctBin = item ? getBin(item.binId) : null;
 
   return (
-    <section
-      aria-live="polite"
-      className="rounded-3xl bg-white p-4 shadow-[0_8px_24px_-16px_rgba(16,40,29,0.45)] ring-1 ring-leaf-100"
-    >
+    <section aria-live="polite">
       <div className="flex items-start gap-3">
         <span
           aria-hidden

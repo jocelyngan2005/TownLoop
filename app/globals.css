@@ -108,6 +108,10 @@ a:focus-visible {
     box-shadow 220ms ease;
 }
 
+.motion-dialog {
+  animation: page-enter 400ms both;
+}
+
 .motion-navigation {
   animation: navigation-slide-in 650ms cubic-bezier(0.22, 1, 0.36, 1) both;
   will-change: transform;

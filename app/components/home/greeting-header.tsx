@@ -1,9 +1,13 @@
+"use client";
+
 import Image from "next/image";
+import { useCallback, useState } from "react";
 
 import { BellIcon } from "@/app/components/icons";
 import { FullscreenNavigation } from "@/app/components/home/fullscreen-navigation";
 import { PlantView } from "@/app/components/home/plant-view";
 import { TimeGreeting } from "@/app/components/home/time-greeting";
+import { NotificationsScreen } from "@/app/components/notifications/notifications-screen";
 import type { LevelSummary, Resident } from "@/lib/home-data";
 
 export function GreetingHeader({
@@ -17,14 +21,21 @@ export function GreetingHeader({
   title?: string;
   showImage?: boolean;
 }) {
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(
+    resident.unreadNotifications,
+  );
+  const closeNotifications = useCallback(() => setNotificationsOpen(false), []);
+
   return (
-    <header
-      className={`relative isolate overflow-hidden rounded-b-[2rem] ${
+    <>
+      <header
+        className={`relative isolate overflow-hidden rounded-b-[2rem] ${
         title ? "h-[140px]" : "h-[220px]"
       } ${
         showImage ? "" : "bg-white"
       }`}
-    >
+      >
       {showImage && (
         <>
           <Image
@@ -44,13 +55,16 @@ export function GreetingHeader({
 
         <button
           type="button"
-          aria-label={`Notifications, ${resident.unreadNotifications} unread`}
+          aria-label={`Notifications, ${unreadNotifications} unread`}
+          aria-expanded={notificationsOpen}
+          aria-controls="townloop-notifications"
+          onClick={() => setNotificationsOpen(true)}
           className="relative grid h-10 w-10 place-items-center rounded-full bg-white/70 text-leaf-900 shadow-sm backdrop-blur transition active:scale-95"
         >
           <BellIcon className="h-5 w-5" />
-          {resident.unreadNotifications > 0 && (
+          {unreadNotifications > 0 && (
             <span className="absolute -right-0.5 -top-0.5 grid h-5 w-5 place-items-center rounded-full bg-clay-500 text-[10px] font-semibold text-white">
-              {resident.unreadNotifications}
+              {unreadNotifications}
             </span>
           )}
         </button>
@@ -79,6 +93,14 @@ export function GreetingHeader({
           )}
         </div>
       )}
-    </header>
+      </header>
+      {notificationsOpen && (
+        <NotificationsScreen
+          unreadCount={unreadNotifications}
+          onClose={closeNotifications}
+          onMarkAllRead={() => setUnreadNotifications(0)}
+        />
+      )}
+    </>
   );
 }

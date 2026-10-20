@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 
-import { ArrowRightIcon, CloseIcon, MenuIcon } from "@/app/components/icons";
+import {
+  ArrowRightIcon,
+  CloseIcon,
+  InfinityIcon,
+  MenuIcon,
+} from "@/app/components/icons";
 
 const navigationItems = [
   { label: "Home", href: "/" },
@@ -59,7 +64,15 @@ export function FullscreenNavigation() {
           >
             <div className="motion-navigation flex min-h-[100dvh] flex-col bg-orchard-500 text-white">
               <div className="flex items-center justify-between px-6 py-5">
-                <span className="text-xl font-semibold tracking-wide">TownLoop</span>
+                <span
+                  className="inline-flex items-center text-xl font-semibold tracking-wide"
+                  aria-hidden="true"
+                >
+                  TownL
+                  <InfinityIcon className="mx-0.5 h-5 w-5" />
+                  p
+                </span>
+                <span className="sr-only">TownLoop</span>
                 <button
                   type="button"
                   aria-label="Close navigation"
