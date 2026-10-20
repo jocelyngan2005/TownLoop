@@ -10,7 +10,7 @@ export function RewardsHighlights({ rewards }: { rewards: Reward[] }) {
       title="Rewards"
       action={
         <a
-          href="/rewards"
+          href="/mobile-app/rewards"
           className="inline-flex items-center gap-1 text-xs font-medium text-leaf-600"
         >
           See all

@@ -11,13 +11,13 @@ import {
 } from "@/app/components/icons";
 
 const navigationItems = [
-  { label: "Home", href: "/" },
-  { label: "Scanner", href: "/scan" },
-  { label: "Drop-off", href: "/drop-off" },
-  { label: "Activity", href: "/activity" },
-  { label: "Take-back", href: "/take-back" },
-  { label: "Rewards", href: "/rewards" },
-  { label: "Profile", href: "/profile" },
+  { label: "Home", href: "/mobile-app" },
+  { label: "Scanner", href: "/mobile-app/scan" },
+  { label: "Drop-off", href: "/mobile-app/drop-off" },
+  { label: "Activity", href: "/mobile-app/activity" },
+  { label: "Take-back", href: "/mobile-app/take-back" },
+  { label: "Rewards", href: "/mobile-app/rewards" },
+  { label: "Profile", href: "/mobile-app/profile" },
 ];
 
 export function FullscreenNavigation() {

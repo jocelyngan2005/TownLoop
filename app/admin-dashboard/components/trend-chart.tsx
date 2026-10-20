@@ -1,0 +1,4 @@
+export function TrendChart({ labels, collected, target, unit = "kg" }: { labels: readonly string[]; collected: readonly number[]; target?: readonly number[]; unit?: string }) {
+  const max = Math.max(...collected, ...(target ?? []));
+  return <div><div className="flex h-52 items-end gap-2 border-b border-l border-[#dfe9e1] px-3 pt-4">{collected.map((value, index) => <div key={labels[index]} className="group flex h-full flex-1 items-end gap-0.5"><div title={`${value} ${unit}`} className="w-full rounded-t bg-[#4d9c6c] transition-all group-hover:bg-[#245842]" style={{ height: `${(value / max) * 100}%` }} />{target && <div title={`${target[index]} ${unit} target`} className="w-full rounded-t bg-[#b9dfbd]" style={{ height: `${(target[index] / max) * 100}%` }} />}</div>)}</div><div className="mt-3 flex justify-between pl-3 text-[9px] text-[#9aae9f]">{labels.map((label) => <span key={label}>{label}</span>)}</div></div>;
+}

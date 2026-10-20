@@ -268,7 +268,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
       <header className="relative z-10 flex shrink-0 items-center justify-between bg-gradient-to-b from-black/70 to-transparent px-5 pb-5 pt-[max(1rem,env(safe-area-inset-top))] text-white">
         <h1 className="text-lg font-semibold">Scanner</h1>
         <Link
-          href="/"
+          href="/mobile-app"
           aria-label="Close scanner and return home"
           className="grid h-11 w-11 place-items-center rounded-full bg-black/40 transition hover:bg-black/60 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
         >

@@ -102,31 +102,31 @@ export const quickActions: QuickAction[] = [
     id: "scan",
     label: "Scan an item",
     hint: "Check how to sort it",
-    href: "/scan",
+    href: "/mobile-app/scan",
   },
   {
     id: "qr-scan",
     label: "Scan a QR code",
     hint: "Check in at the bin",
-    href: "/scan#qr",
+    href: "/mobile-app/scan#qr",
   },
   {
     id: "drop-off",
     label: "Find a drop-off",
     hint: "15 points nearby",
-    href: "/drop-off",
+    href: "/mobile-app/drop-off",
   },
   {
     id: "rewards",
     label: "Claim rewards",
     hint: "1,240 pts ready",
-    href: "/rewards",
+    href: "/mobile-app/rewards",
   },
   {
     id: "take-back",
     label: "Take-back",
     hint: "6 open campaigns",
-    href: "/take-back",
+    href: "/mobile-app/take-back",
   },
 ];
 

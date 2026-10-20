@@ -20,7 +20,7 @@ export function TakeBackHighlights({
       title="Take-back campaigns"
       action={
         <a
-          href="/take-back"
+          href="/mobile-app/take-back"
           className="inline-flex items-center gap-1 text-xs font-medium text-leaf-600"
         >
           See all
