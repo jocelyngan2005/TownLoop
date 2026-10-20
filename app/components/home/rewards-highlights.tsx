@@ -32,7 +32,7 @@ export function RewardsHighlights({ rewards }: { rewards: Reward[] }) {
             <p className="mt-1 text-sm font-semibold leading-snug text-leaf-900">
               {reward.title}
             </p>
-            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-leaf-50 px-2.5 py-1 text-[11px] font-semibold text-leaf-900">
+            <p className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-leaf-200 px-2.5 py-1 text-[11px] font-semibold text-leaf-900">
               <CoinIcon className="h-3.5 w-3.5 text-sun-400" />
               {reward.costPoints.toLocaleString()}
             </p>

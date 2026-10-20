@@ -29,11 +29,11 @@ export type AccountLink = {
 };
 
 export const profileDetails: ProfileDetails = {
-  fullName: "Emilia Nowak",
-  initials: "EN",
-  email: "emilia.nowak@example.com",
-  phone: "+31 6 1234 5678",
-  address: "Maple Street 48, Block C · Unit 12",
+  fullName: "Nur Aisyah Rahman",
+  initials: "NA",
+  email: "nur.aisyah@example.com",
+  phone: "+60 12-345 6789",
+  address: "Jalan SS 15/4, Block C, 47500 Subang Jaya, Selangor",
   householdSize: 3,
   memberSince: "March 2024",
   membershipId: "TL-884-2291",

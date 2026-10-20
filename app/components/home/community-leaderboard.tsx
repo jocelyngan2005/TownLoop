@@ -23,7 +23,7 @@ export function CommunityLeaderboardCard({
             <TrophyIcon className="h-7 w-7 shrink-0 text-sun-300" />
             <div>
               <p className="text-xs font-medium text-white/80">
-                Your township rank
+                Your neighbourhood rank
               </p>
               <p className="mt-0.5 text-3xl font-bold leading-none">
                 #{ranking.rank}

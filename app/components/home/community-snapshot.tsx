@@ -32,7 +32,7 @@ export function CommunitySnapshotSection({
               {percent}%
             </span>
             <span className="block text-[10px] text-leaf-800/70">
-              township goal
+              neighbourhood goal
             </span>
           </p>
         </div>
@@ -40,7 +40,7 @@ export function CommunitySnapshotSection({
         <div className="mt-3 h-2.5 w-full overflow-hidden rounded-full bg-white/70">
           <div
             role="progressbar"
-            aria-label={`${challenge.title} township progress`}
+            aria-label={`${challenge.title} neighbourhood progress`}
             aria-valuemin={0}
             aria-valuemax={100}
             aria-valuenow={percent}

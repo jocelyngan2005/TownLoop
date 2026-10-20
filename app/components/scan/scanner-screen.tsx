@@ -395,8 +395,8 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
                         <li>Scan one item at a time against a plain surface.</li>
                         <li>Make sure labels and recycling codes face the camera.</li>
                         <li>
-                          The verdict covers your township&apos;s accepted streams
-                          only.
+                          The verdict covers only materials accepted in your local
+                          area.
                         </li>
                       </ul>
                     )}
