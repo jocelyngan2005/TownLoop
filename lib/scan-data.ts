@@ -157,31 +157,6 @@ export const scanItems: ScanItem[] = [
     ],
   },
   {
-    id: "newspaper",
-    name: "Newspaper stack",
-    material: "Paper and cardboard",
-    verdict: "recyclable",
-    binId: "paper",
-    points: 8,
-    summary: "Newsprint fibres can be reprocessed several times.",
-    prepSteps: ["Keep it dry", "Tie or stack loosely — no plastic bags"],
-  },
-  {
-    id: "pizza-box",
-    name: "Greasy pizza box",
-    material: "Contaminated paper",
-    verdict: "not-recyclable",
-    binId: "residual",
-    points: 0,
-    summary:
-      "Oil and cheese ruin the paper fibres, so the whole batch can be rejected.",
-    prepSteps: [
-      "Tear off the clean lid and recycle that part",
-      "Put the greasy base in general waste",
-    ],
-    note: "Food-soiled paper is the most common contaminant in your block.",
-  },
-  {
     id: "pet-bottle",
     name: "PET drink bottle",
     material: "Plastics",
@@ -193,16 +168,6 @@ export const scanItems: ScanItem[] = [
       "Empty and rinse the bottle",
       "Squash it flat and screw the cap back on",
     ],
-  },
-  {
-    id: "yoghurt-cup",
-    name: "Yoghurt cup",
-    material: "Plastics",
-    verdict: "prep-required",
-    binId: "plastics",
-    points: 6,
-    summary: "Accepted only when the tub is free of food residue.",
-    prepSteps: ["Rinse out the leftovers", "Remove the foil lid — that is metal"],
   },
   {
     id: "plastic-bag",
@@ -219,26 +184,6 @@ export const scanItems: ScanItem[] = [
     ],
   },
   {
-    id: "glass-bottle",
-    name: "Glass bottle",
-    material: "Glass",
-    verdict: "recyclable",
-    binId: "glass",
-    points: 14,
-    summary: "Glass can be melted down endlessly without losing quality.",
-    prepSteps: ["Empty and rinse", "Remove metal or plastic caps"],
-  },
-  {
-    id: "glass-jar",
-    name: "Glass jar",
-    material: "Glass",
-    verdict: "prep-required",
-    binId: "glass",
-    points: 12,
-    summary: "Jars are accepted once the food residue and lid are gone.",
-    prepSteps: ["Rinse the jar", "Recycle the metal lid in the metals bin"],
-  },
-  {
     id: "aluminium-can",
     name: "Aluminium can",
     material: "Metals",
@@ -248,26 +193,6 @@ export const scanItems: ScanItem[] = [
     summary:
       "Recycling aluminium uses about 5% of the energy needed for new metal.",
     prepSteps: ["Pour out any liquid", "Leave the can whole or lightly crushed"],
-  },
-  {
-    id: "steel-tin",
-    name: "Steel food tin",
-    material: "Metals",
-    verdict: "prep-required",
-    binId: "metals",
-    points: 11,
-    summary: "Steel tins are magnetically separated and fully recyclable.",
-    prepSteps: ["Rinse out the food", "Tuck the sharp lid inside the tin"],
-  },
-  {
-    id: "banana-peel",
-    name: "Fruit and veg scraps",
-    material: "Organic / biomatter",
-    verdict: "recyclable",
-    binId: "organic",
-    points: 5,
-    summary: "Compostable at the community corner rather than landfilled.",
-    prepSteps: ["No stickers or rubber bands", "Keep meat and dairy out"],
   },
   {
     id: "old-phone",
@@ -307,20 +232,6 @@ export const scanItems: ScanItem[] = [
     summary: "Wearable clothing is redistributed before it is shredded.",
     prepSteps: ["Make sure it is clean and dry", "Bag it to keep it dry in transit"],
   },
-  {
-    id: "coffee-cup",
-    name: "Disposable coffee cup",
-    material: "Mixed paper and plastic",
-    verdict: "not-recyclable",
-    binId: "residual",
-    points: 0,
-    summary:
-      "The plastic lining is bonded to the paper, so standard mills reject it.",
-    prepSteps: [
-      "Recycle the cardboard sleeve separately",
-      "Switch to a reusable cup to earn points instead",
-    ],
-  },
 ];
 
 /** Hex colours are compared against the captured frame to pick a likely stream. */
@@ -358,37 +269,20 @@ export type ItemMatch = {
   confidence: number;
 };
 
-/**
- * Stand-in for the on-device vision model: the dominant colour of the frame is
- * matched to the closest waste stream, then an item of that stream is picked.
- */
+/** Returns items in scanItems order; frame color only affects confidence. */
 export function identifyFromFrame(
   averageColor: { r: number; g: number; b: number },
   previouslySeenIds: string[] = [],
 ): ItemMatch {
-  let closest = binColorRgb[0];
-  let smallestDistance = Number.POSITIVE_INFINITY;
-
-  for (const candidate of binColorRgb) {
-    const distance =
-      (candidate.rgb.r - averageColor.r) ** 2 +
-      (candidate.rgb.g - averageColor.g) ** 2 +
-      (candidate.rgb.b - averageColor.b) ** 2;
-
-    if (distance < smallestDistance) {
-      smallestDistance = distance;
-      closest = candidate;
-    }
-  }
-
-  const candidates = scanItems.filter((item) => item.binId === closest.id);
-  const pool = candidates.length > 0 ? candidates : scanItems;
-  const unseen = pool.filter((item) => !previouslySeenIds.includes(item.id));
-  const shortlist = unseen.length > 0 ? unseen : pool;
-  const item = shortlist[previouslySeenIds.length % shortlist.length];
+  const item = scanItems[previouslySeenIds.length % scanItems.length];
+  const itemBin = binColorRgb.find((candidate) => candidate.id === item.binId)!;
+  const colorDistance =
+    (itemBin.rgb.r - averageColor.r) ** 2 +
+    (itemBin.rgb.g - averageColor.g) ** 2 +
+    (itemBin.rgb.b - averageColor.b) ** 2;
 
   // 0 distance -> 0.96 confidence, far away -> ~0.68.
-  const normalizedDistance = Math.min(1, Math.sqrt(smallestDistance) / 441);
+  const normalizedDistance = Math.min(1, Math.sqrt(colorDistance) / 441);
   const confidence = Math.round((0.96 - normalizedDistance * 0.28) * 100) / 100;
 
   return { item, confidence };
