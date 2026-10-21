@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import jsQR from "jsqr";
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 
 import { CloseIcon, CoinIcon, QrCodeIcon, ScanIcon } from "@/app/components/icons";
@@ -20,16 +21,6 @@ import {
 } from "@/lib/scan-data";
 
 type Mode = "item" | "qr";
-
-type DetectedBarcode = { rawValue: string };
-
-type BarcodeDetectorLike = {
-  detect(source: CanvasImageSource): Promise<DetectedBarcode[]>;
-};
-
-type BarcodeDetectorConstructor = new (options?: {
-  formats?: string[];
-}) => BarcodeDetectorLike;
 
 const demoItems = ["glass-bottle", "pet-bottle", "old-phone", "pizza-box"]
   .map((id) => scanItems.find((item) => item.id === id))
@@ -53,6 +44,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   const [codeError, setCodeError] = useState<string | null>(null);
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const analysisTimeout = useRef<number | null>(null);
 
   // `/scan#qr` opens straight into bin check-in without a dynamic server read.
@@ -194,34 +186,48 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   useEffect(() => {
     if (mode !== "qr" || checkIn || !cameraReady) return;
 
-    let detector: BarcodeDetectorLike | null = null;
     let stopped = false;
+    let processing = false;
 
     const interval = window.setInterval(async () => {
       const video = videoRef.current;
-      if (stopped || !video || video.readyState < 2) return;
+      if (
+        stopped ||
+        processing ||
+        !video ||
+        video.readyState < 2 ||
+        video.videoWidth === 0
+      ) return;
 
-      if (!detector) {
-        const BarcodeDetector = (
-          window as unknown as { BarcodeDetector?: BarcodeDetectorConstructor }
-        ).BarcodeDetector;
-
-        try {
-          if (!BarcodeDetector) throw new Error("unsupported");
-          detector = new BarcodeDetector({ formats: ["qr_code"] });
-        } catch {
-          stopped = true;
-          window.clearInterval(interval);
-          return;
-        }
-      }
-
+      processing = true;
       try {
-        const codes = await detector.detect(video);
-        if (stopped || codes.length === 0) return;
-        registerCode(codes[0].rawValue);
+        const canvas = (qrCanvasRef.current ??= document.createElement("canvas"));
+        const scale = Math.min(
+          1,
+          720 / Math.max(video.videoWidth, video.videoHeight),
+        );
+        canvas.width = Math.round(video.videoWidth * scale);
+        canvas.height = Math.round(video.videoHeight * scale);
+
+        const context = canvas.getContext("2d", { willReadFrequently: true });
+        if (!context) return;
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const { data, width, height } = context.getImageData(
+          0,
+          0,
+          canvas.width,
+          canvas.height,
+        );
+        const code = jsQR(data, width, height, {
+          inversionAttempts: "attemptBoth",
+        });
+
+        if (!stopped && code) registerCode(code.data);
       } catch {
         // A failed frame is not fatal — the next tick tries again.
+      } finally {
+        processing = false;
       }
     }, 500);
 
