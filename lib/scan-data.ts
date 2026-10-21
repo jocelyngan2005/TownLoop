@@ -157,44 +157,6 @@ export const scanItems: ScanItem[] = [
     ],
   },
   {
-    id: "pet-bottle",
-    name: "PET drink bottle",
-    material: "Plastics",
-    verdict: "prep-required",
-    binId: "plastics",
-    points: 10,
-    summary: "PET is widely recycled once the bottle is empty and rinsed.",
-    prepSteps: [
-      "Empty and rinse the bottle",
-      "Squash it flat and screw the cap back on",
-    ],
-  },
-  {
-    id: "plastic-bag",
-    name: "Plastic carrier bag",
-    material: "Film plastic",
-    verdict: "not-recyclable",
-    binId: "residual",
-    points: 0,
-    summary:
-      "Soft film jams the sorting machinery at the local recycling facility.",
-    prepSteps: [
-      "Reuse the bag as long as you can",
-      "Return clean film to a supermarket collection point if available",
-    ],
-  },
-  {
-    id: "aluminium-can",
-    name: "Aluminium can",
-    material: "Metals",
-    verdict: "recyclable",
-    binId: "metals",
-    points: 15,
-    summary:
-      "Recycling aluminium uses about 5% of the energy needed for new metal.",
-    prepSteps: ["Pour out any liquid", "Leave the can whole or lightly crushed"],
-  },
-  {
     id: "old-phone",
     name: "Old mobile phone",
     material: "E-waste",
