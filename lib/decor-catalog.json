@@ -1,0 +1,287 @@
+{
+  "sheet": "/interiors_demo.png",
+  "sheetWidth": 256,
+  "sheetHeight": 176,
+  "tile": 16,
+  "items": [
+    {
+      "id": "wall-stone",
+      "name": "Stone Wall",
+      "category": "wall",
+      "x": 48,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "id": "wall-drape-blue",
+      "name": "Blue Drape",
+      "category": "wall",
+      "x": 0,
+      "y": 0,
+      "w": 48,
+      "h": 48
+    },
+    {
+      "id": "floor-concrete",
+      "name": "Concrete Floor",
+      "category": "floor",
+      "x": 96,
+      "y": 32,
+      "w": 15,
+      "h": 16
+    },
+    {
+      "id": "floor-wood",
+      "name": "Wood Floor",
+      "category": "floor",
+      "x": 112,
+      "y": 32,
+      "w": 16,
+      "h": 16
+    },
+    {
+      "id": "window",
+      "name": "Window",
+      "category": "wall",
+      "x": 103,
+      "y": 9,
+      "w": 18,
+      "h": 18
+    },
+    {
+      "id": "armchair-front",
+      "name": "Armchair",
+      "category": "seating",
+      "x": 130,
+      "y": 2,
+      "w": 28,
+      "h": 30
+    },
+    {
+      "id": "armchair-left",
+      "name": "Armchair (Left)",
+      "category": "seating",
+      "x": 161,
+      "y": 0,
+      "w": 23,
+      "h": 32
+    },
+    {
+      "id": "armchair-back",
+      "name": "Armchair (Back)",
+      "category": "seating",
+      "x": 194,
+      "y": 7,
+      "w": 28,
+      "h": 25
+    },
+    {
+      "id": "armchair-right",
+      "name": "Armchair (Right)",
+      "category": "seating",
+      "x": 232,
+      "y": 0,
+      "w": 23,
+      "h": 32
+    },
+    {
+      "id": "armchair-wing",
+      "name": "Wing Armchair",
+      "category": "seating",
+      "x": 48,
+      "y": 128,
+      "w": 32,
+      "h": 48
+    },
+    {
+      "id": "sofa-red",
+      "name": "Red Sofa",
+      "category": "seating",
+      "x": 0,
+      "y": 130,
+      "w": 47,
+      "h": 30
+    },
+    {
+      "id": "sofa-red-low",
+      "name": "Low Sofa",
+      "category": "seating",
+      "x": 80,
+      "y": 135,
+      "w": 47,
+      "h": 25
+    },
+    {
+      "id": "chair-dining",
+      "name": "Dining Chair",
+      "category": "seating",
+      "x": 129,
+      "y": 97,
+      "w": 18,
+      "h": 31
+    },
+    {
+      "id": "chair-dining-alt",
+      "name": "Slatted Chair",
+      "category": "seating",
+      "x": 161,
+      "y": 97,
+      "w": 16,
+      "h": 31
+    },
+    {
+      "id": "bed-blue",
+      "name": "Blue Bed",
+      "category": "bedroom",
+      "x": 177,
+      "y": 37,
+      "w": 46,
+      "h": 59
+    },
+    {
+      "id": "bed-green",
+      "name": "Green Bed",
+      "category": "bedroom",
+      "x": 225,
+      "y": 37,
+      "w": 30,
+      "h": 59
+    },
+    {
+      "id": "bedside-set",
+      "name": "Bedside Set",
+      "category": "bedroom",
+      "x": 144,
+      "y": 44,
+      "w": 32,
+      "h": 36
+    },
+    {
+      "id": "cabinet",
+      "name": "Cabinet",
+      "category": "bedroom",
+      "x": 116,
+      "y": 58,
+      "w": 24,
+      "h": 22
+    },
+    {
+      "id": "table-long",
+      "name": "Long Table",
+      "category": "table",
+      "x": 0,
+      "y": 58,
+      "w": 72,
+      "h": 24
+    },
+    {
+      "id": "table-wood",
+      "name": "Wooden Table",
+      "category": "table",
+      "x": 201,
+      "y": 136,
+      "w": 40,
+      "h": 40
+    },
+    {
+      "id": "bookshelf",
+      "name": "Bookshelf",
+      "category": "table",
+      "x": 168,
+      "y": 128,
+      "w": 26,
+      "h": 48
+    },
+    {
+      "id": "rug-red",
+      "name": "Red Carpet",
+      "category": "rug",
+      "x": 81,
+      "y": 81,
+      "w": 46,
+      "h": 46
+    },
+    {
+      "id": "rug-blue",
+      "name": "Blue Rug",
+      "category": "rug",
+      "x": 80,
+      "y": 53,
+      "w": 32,
+      "h": 22
+    },
+    {
+      "id": "mirror-tall",
+      "name": "Tall Mirror",
+      "category": "decor",
+      "x": 10,
+      "y": 90,
+      "w": 28,
+      "h": 38
+    },
+    {
+      "id": "curtains-red",
+      "name": "Red Curtains",
+      "category": "decor",
+      "x": 196,
+      "y": 103,
+      "w": 24,
+      "h": 25
+    },
+    {
+      "id": "plant-tall",
+      "name": "Tall Houseplant",
+      "category": "plant",
+      "x": 224,
+      "y": 97,
+      "w": 16,
+      "h": 31
+    },
+    {
+      "id": "flowerpot-pink",
+      "name": "Pink Flowerpot",
+      "category": "plant",
+      "x": 242,
+      "y": 114,
+      "w": 10,
+      "h": 14
+    },
+    {
+      "id": "succulent",
+      "name": "Succulent",
+      "category": "plant",
+      "x": 242,
+      "y": 130,
+      "w": 11,
+      "h": 14
+    },
+    {
+      "id": "watering-can",
+      "name": "Watering Can",
+      "category": "decor",
+      "x": 244,
+      "y": 99,
+      "w": 9,
+      "h": 9
+    },
+    {
+      "id": "books-blue",
+      "name": "Stack of Books",
+      "category": "decor",
+      "x": 114,
+      "y": 164,
+      "w": 11,
+      "h": 11
+    },
+    {
+      "id": "book-open",
+      "name": "Open Book",
+      "category": "decor",
+      "x": 98,
+      "y": 166,
+      "w": 13,
+      "h": 9
+    }
+  ]
+}

@@ -14,6 +14,7 @@ import {
   monthlyImpact,
   resident,
 } from "@/lib/home-data";
+import { leaderboardSeason, leaderboardTopTen } from "@/lib/leaderboard-data";
 
 export default function ActivityPage() {
   const activeChallenges = challenges.slice(0, 2);
@@ -23,7 +24,11 @@ export default function ActivityPage() {
       <GreetingHeader resident={resident} title="Activity" showImage={false} />
 
       <main className="flex flex-col gap-6 pt-3">
-        <CommunityLeaderboardCard ranking={communityLeaderboard} />
+        <CommunityLeaderboardCard
+          ranking={communityLeaderboard}
+          entries={leaderboardTopTen}
+          season={leaderboardSeason}
+        />
         <MonthlyImpactSection impact={monthlyImpact} />
         <CircularActionsSection actions={circularActions} />
         <GoalsAndStreaks goals={goals} />

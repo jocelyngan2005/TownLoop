@@ -72,6 +72,8 @@ export type CommunitySnapshot = {
 export type CommunityLeaderboard = {
   rank: number;
   communitySize: number;
+  /** Points earned in the current leaderboard season, used to show the gap to the top 10. */
+  seasonPoints: number;
 };
 
 export type Insight = {
@@ -277,9 +279,11 @@ export const communitySnapshot: CommunitySnapshot = {
   userContribution: 7.8,
 };
 
+/** Must stay consistent with the entry flagged `isCurrentUser` in `leaderboardTopTen`. */
 export const communityLeaderboard: CommunityLeaderboard = {
-  rank: 18,
+  rank: 4,
   communitySize: 284,
+  seasonPoints: 2740,
 };
 
 export const insights: Insight[] = [

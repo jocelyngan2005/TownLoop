@@ -1,6 +1,8 @@
 import { GreetingHeader } from "@/app/components/home/greeting-header";
 import { RewardsScreen } from "@/app/components/rewards/rewards-screen";
-import { levelSummary, resident } from "@/lib/home-data";
+import { TownshipRewards } from "@/app/components/rewards/township-rewards";
+import { communityLeaderboard, levelSummary, resident } from "@/lib/home-data";
+import { leaderboardSeason, townshipRewards } from "@/lib/leaderboard-data";
 import { rewards, rewardsSummary, vouchers } from "@/lib/rewards-data";
 
 export default function RewardsPage() {
@@ -13,6 +15,13 @@ export default function RewardsPage() {
         rewards={rewards}
         initialVouchers={vouchers}
         summary={rewardsSummary}
+        townshipPanel={
+          <TownshipRewards
+            rewards={townshipRewards}
+            season={leaderboardSeason}
+            userRank={communityLeaderboard.rank}
+          />
+        }
       />
     </div>
   );

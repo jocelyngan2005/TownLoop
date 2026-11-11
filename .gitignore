@@ -42,3 +42,6 @@ next-env.d.ts
 
 # next.js generated route types (regenerated into .next/types)
 /types/
+
+# Windows alternate-data-stream files from downloaded assets
+*:Zone.Identifier

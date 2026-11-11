@@ -1,0 +1,188 @@
+{
+  "sheet": "/free_pixel_16_woods.png",
+  "sheetWidth": 352,
+  "sheetHeight": 192,
+  "tile": 16,
+  "items": [
+    {
+      "id": "grass-tuft-a",
+      "name": "Grass Tuft",
+      "category": "scatter",
+      "x": 96,
+      "y": 32,
+      "w": 7,
+      "h": 7
+    },
+    {
+      "id": "grass-tuft-b",
+      "name": "Grass Tuft",
+      "category": "scatter",
+      "x": 100,
+      "y": 70,
+      "w": 8,
+      "h": 8
+    },
+    {
+      "id": "grass-tuft-c",
+      "name": "Grass Tuft",
+      "category": "scatter",
+      "x": 112,
+      "y": 80,
+      "w": 7,
+      "h": 8
+    },
+    {
+      "id": "grass-tuft-d",
+      "name": "Grass Tuft",
+      "category": "scatter",
+      "x": 136,
+      "y": 80,
+      "w": 8,
+      "h": 7
+    },
+    {
+      "id": "grass-tuft-e",
+      "name": "Grass Clump",
+      "category": "scatter",
+      "x": 121,
+      "y": 88,
+      "w": 15,
+      "h": 8
+    },
+    {
+      "id": "fern",
+      "name": "Fern",
+      "category": "scatter",
+      "x": 225,
+      "y": 52,
+      "w": 13,
+      "h": 12
+    },
+    {
+      "id": "leaf-sprig",
+      "name": "Leaf Sprig",
+      "category": "scatter",
+      "x": 240,
+      "y": 54,
+      "w": 15,
+      "h": 10
+    },
+    {
+      "id": "flower-pink",
+      "name": "Pink Flower",
+      "category": "scatter",
+      "x": 258,
+      "y": 54,
+      "w": 11,
+      "h": 10
+    },
+    {
+      "id": "flowers-yellow",
+      "name": "Yellow Flowers",
+      "category": "scatter",
+      "x": 81,
+      "y": 84,
+      "w": 14,
+      "h": 10
+    },
+    {
+      "id": "flowers-red",
+      "name": "Red Flowers",
+      "category": "scatter",
+      "x": 97,
+      "y": 84,
+      "w": 14,
+      "h": 10
+    },
+    {
+      "id": "mushroom-red",
+      "name": "Red Mushrooms",
+      "category": "scatter",
+      "x": 229,
+      "y": 70,
+      "w": 10,
+      "h": 11
+    },
+    {
+      "id": "mushroom-blue",
+      "name": "Blue Mushrooms",
+      "category": "scatter",
+      "x": 243,
+      "y": 71,
+      "w": 13,
+      "h": 10
+    },
+    {
+      "id": "stump",
+      "name": "Tree Stump",
+      "category": "scatter",
+      "x": 230,
+      "y": 83,
+      "w": 17,
+      "h": 15
+    },
+    {
+      "id": "rock-cluster",
+      "name": "Rocks",
+      "category": "scatter",
+      "x": 224,
+      "y": 36,
+      "w": 16,
+      "h": 12
+    },
+    {
+      "id": "stone-small",
+      "name": "Pebble",
+      "category": "scatter",
+      "x": 244,
+      "y": 41,
+      "w": 8,
+      "h": 5
+    },
+    {
+      "id": "twig",
+      "name": "Twig",
+      "category": "scatter",
+      "x": 260,
+      "y": 39,
+      "w": 9,
+      "h": 9
+    },
+    {
+      "id": "tree-big",
+      "name": "Oak Tree",
+      "category": "tree",
+      "x": 275,
+      "y": 10,
+      "w": 59,
+      "h": 70
+    },
+    {
+      "id": "tree-bush",
+      "name": "Bush Tree",
+      "category": "tree",
+      "x": 275,
+      "y": 92,
+      "w": 28,
+      "h": 36
+    },
+    {
+      "id": "tree-pine",
+      "name": "Pine Tree",
+      "category": "tree",
+      "x": 308,
+      "y": 97,
+      "w": 25,
+      "h": 31
+    },
+    {
+      "id": "grass-patch",
+      "name": "Grass Patch",
+      "category": "terrain",
+      "x": 151,
+      "y": 23,
+      "w": 66,
+      "h": 66
+    }
+  ]
+}

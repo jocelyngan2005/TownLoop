@@ -1,12 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { useCallback, useState } from "react";
 
 import { BellIcon } from "@/app/components/icons";
 import { FullscreenNavigation } from "@/app/components/home/fullscreen-navigation";
-import { PlantView } from "@/app/components/home/plant-view";
+import { HouseView } from "@/app/components/home/house/house-view";
 import { TimeGreeting } from "@/app/components/home/time-greeting";
+import { WoodsBackdrop } from "@/app/components/home/woods-backdrop";
 import { NotificationsScreen } from "@/app/components/notifications/notifications-screen";
 import type { LevelSummary, Resident } from "@/lib/home-data";
 
@@ -36,19 +36,7 @@ export function GreetingHeader({
         showImage ? "" : "bg-white"
       }`}
       >
-      {showImage && (
-        <>
-          <Image
-            src="/soil-background.jpg"
-            alt=""
-            fill
-            priority
-            sizes="(max-width: 448px) 100vw, 448px"
-            className="-z-20 object-cover object-[50%_58%]"
-          />
-          <div className="absolute inset-0 -z-10 bg-gradient-to-b from-leaf-50/85 via-leaf-50/30 to-transparent" />
-        </>
-      )}
+      {showImage && <WoodsBackdrop />}
 
       <div className="flex items-center justify-between px-5 pt-5">
         <FullscreenNavigation />
@@ -88,7 +76,7 @@ export function GreetingHeader({
               <span className="rounded-full bg-white/80 px-3 py-1 text-xs font-medium text-leaf-800 backdrop-blur">
                 {resident.block}
               </span>
-              <PlantView level={level} />
+              <HouseView level={level} />
             </div>
           )}
         </div>

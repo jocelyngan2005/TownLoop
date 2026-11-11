@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 
 import { CheckIcon, CloseIcon, CoinIcon } from "@/app/components/icons";
@@ -35,15 +35,20 @@ export function RewardsScreen({
   rewards,
   initialVouchers,
   summary,
+  townshipPanel,
 }: {
   initialPoints: number;
   rewards: Reward[];
   initialVouchers: Voucher[];
   summary: RewardsSummary;
+  /** Rank-gated township perks, rendered in their own tab. */
+  townshipPanel?: ReactNode;
 }) {
   const [points, setPoints] = useState(initialPoints);
   const [vouchers, setVouchers] = useState(initialVouchers);
-  const [tab, setTab] = useState<"catalog" | "vouchers">("catalog");
+  const [tab, setTab] = useState<"catalog" | "township" | "vouchers">(
+    "catalog",
+  );
   const [category, setCategory] = useState<RewardCategory | "all">("all");
   const [pendingReward, setPendingReward] = useState<Reward | null>(null);
   const [newVoucherId, setNewVoucherId] = useState<string | null>(null);
@@ -105,7 +110,9 @@ export function RewardsScreen({
         <div
           role="tablist"
           aria-label="Rewards sections"
-          className="grid grid-cols-2 gap-1 rounded-full bg-leaf-50 p-1"
+          className={`grid gap-1 rounded-full bg-leaf-50 p-1 ${
+            townshipPanel ? "grid-cols-3" : "grid-cols-2"
+          }`}
         >
           <button
             type="button"
@@ -120,8 +127,25 @@ export function RewardsScreen({
                 : "text-leaf-700/70"
             }`}
           >
-            Reward catalog
+            {townshipPanel ? "Partners" : "Reward catalog"}
           </button>
+          {townshipPanel && (
+            <button
+              type="button"
+              role="tab"
+              id="tab-township"
+              aria-selected={tab === "township"}
+              aria-controls="panel-township"
+              onClick={() => setTab("township")}
+              className={`rounded-full py-2 text-xs font-semibold transition ${
+                tab === "township"
+                  ? "bg-white text-leaf-900 shadow-sm"
+                  : "text-leaf-700/70"
+              }`}
+            >
+              Township
+            </button>
+          )}
           <button
             type="button"
             role="tab"
@@ -135,12 +159,14 @@ export function RewardsScreen({
                 : "text-leaf-700/70"
             }`}
           >
-            My vouchers ({activeVouchers})
+            {townshipPanel
+              ? `Vouchers (${activeVouchers})`
+              : `My vouchers (${activeVouchers})`}
           </button>
         </div>
       </div>
 
-      {tab === "catalog" ? (
+      {tab === "catalog" && (
         <section
           id="panel-catalog"
           role="tabpanel"
@@ -181,9 +207,21 @@ export function RewardsScreen({
             ))}
           </ul>
 
-          
+
         </section>
-      ) : (
+      )}
+
+      {tab === "township" && townshipPanel && (
+        <section
+          id="panel-township"
+          role="tabpanel"
+          aria-labelledby="tab-township"
+        >
+          {townshipPanel}
+        </section>
+      )}
+
+      {tab === "vouchers" && (
         <section
           id="panel-vouchers"
           role="tabpanel"
