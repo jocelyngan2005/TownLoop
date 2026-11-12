@@ -9,7 +9,12 @@ import {
   type Reward,
   type Voucher,
 } from "@/lib/rewards-data";
-import type { BinId, ItemMatch, ScanItem } from "@/lib/scan-data";
+import {
+  DEMO_BIN_ID,
+  type CheckInBinId,
+  type ItemMatch,
+  type ScanItem,
+} from "@/lib/scan-data";
 
 /**
  * The single owner of the resident's points.
@@ -198,10 +203,18 @@ export function discardCarried(uid: string) {
  * Checks in at a bin: every carried item belonging to `binId` is disposed and
  * credited, the rest stay on the list. Returns the receipt for the UI.
  */
-export function disposeAtBin(binId: BinId): DisposalReceipt {
+export function disposeAtBin(binId: CheckInBinId): DisposalReceipt {
   const current = getSnapshot();
-  const disposed = current.carried.filter((entry) => entry.item.binId === binId);
-  const remaining = current.carried.filter((entry) => entry.item.binId !== binId);
+
+  // The demo bin stands in for every stream, so a check-in against it clears
+  // the whole carry list and can never come back as a mismatch.
+  const takesEverything = binId === DEMO_BIN_ID;
+  const disposed = takesEverything
+    ? current.carried
+    : current.carried.filter((entry) => entry.item.binId === binId);
+  const remaining = takesEverything
+    ? []
+    : current.carried.filter((entry) => entry.item.binId !== binId);
 
   const itemPoints = disposed.reduce((sum, entry) => sum + entry.item.points, 0);
   // General waste alone is not "clean sorting", so it does not earn the bonus.

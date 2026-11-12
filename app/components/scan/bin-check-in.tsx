@@ -8,10 +8,10 @@ import {
 } from "@/app/components/icons";
 import { NearestDropOffLine } from "@/app/components/scan/nearest-drop-off";
 import type { DisposalReceipt } from "@/lib/points-store";
-import { getBin, type BinId, type RecyclingBin } from "@/lib/scan-data";
+import { getBin, type BinId, type CheckInBin } from "@/lib/scan-data";
 
 export type BinCheckIn = {
-  bin: RecyclingBin;
+  bin: CheckInBin;
   receipt: DisposalReceipt;
   /**
    * "matched" — at least one carried item belonged here and was dropped off.

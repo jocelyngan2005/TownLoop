@@ -55,6 +55,37 @@ export type RecyclingBin = {
   rejects: string;
 };
 
+/**
+ * The demo bin's own id, kept outside `binIds` on purpose: it is not a stream,
+ * so it must never reach the Gemini enum, the drop-off filters, or anything
+ * that maps over the real bins.
+ */
+export const DEMO_BIN_ID = "demo-any";
+
+/** A bin a check-in can resolve to — a real stream, or the demo sticker. */
+export type CheckInBinId = BinId | typeof DEMO_BIN_ID;
+
+export type CheckInBin = Omit<RecyclingBin, "id"> & { id: CheckInBinId };
+
+/**
+ * A stand-in bin for demos and manual testing. It accepts every stream, so a
+ * check-in against it always disposes the whole carry list and never reports a
+ * wrong-bin mismatch.
+ *
+ * Its QR sticker is generated into public/bin-qr/ by
+ * `node scripts/build-bin-qr.mjs`, which reads the code below straight out of
+ * this file so the sticker and the matcher cannot drift apart.
+ */
+export const demoBin: CheckInBin = {
+  id: DEMO_BIN_ID,
+  label: "Demo bin (accepts everything)",
+  color: "#6c5ce7",
+  qrCode: "TL-BIN-DEMO-C12",
+  location: "Demo sticker — stands in for any bin",
+  accepts: "Everything on your carry list, whichever stream it belongs to",
+  rejects: "Nothing — this bin exists to exercise the check-in flow",
+};
+
 export const verdictMeta: Record<
   Verdict,
   { label: string; headline: string; badgeClass: string; dotClass: string }
@@ -267,13 +298,18 @@ export function getBin(id: BinId) {
   return bin;
 }
 
-export function findBinByCode(rawCode: string) {
+export function findBinByCode(rawCode: string): CheckInBin | undefined {
   const normalized = rawCode.trim().toUpperCase().replace(/\s+/g, "");
   if (!normalized) return undefined;
 
-  return recyclingBins.find(
-    (bin) => normalized === bin.qrCode || normalized.includes(bin.qrCode),
-  );
+  const matches = (bin: CheckInBin) =>
+    normalized === bin.qrCode || normalized.includes(bin.qrCode);
+
+  // The demo bin is checked first and is not part of recyclingBins, so it can
+  // never shadow or be shadowed by a real stream.
+  if (matches(demoBin)) return demoBin;
+
+  return recyclingBins.find(matches);
 }
 
 export type ItemMatch = {
