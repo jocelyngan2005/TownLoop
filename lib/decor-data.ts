@@ -163,8 +163,29 @@ const emptyTally = (): MaterialTally => ({
 });
 
 /**
+ * Demo bootstrap: materials credited on top of what the tracked kg work out to.
+ *
+ * One month of monthlyImpact earns only 9 cardboard, 3 wood offcuts and 5 glass
+ * bottles, against the 80 / 25 / 10 the kitchen costs — so the first paid room
+ * is months of scanning away and the build flow cannot be shown at all. This
+ * grant covers the kitchen and leaves enough behind to furnish it.
+ *
+ * It is additive and deliberately separate from monthlyImpact: the impact
+ * figures on the home screen stay the weights actually recorded. Set every
+ * value to 0 to return to the earned-only economy.
+ */
+export const DEMO_MATERIAL_GRANT: MaterialTally = {
+  cardboard: 101,
+  petBottle: 0,
+  glassBottle: 15,
+  metalCan: 0,
+  woodOffcut: 37,
+  garment: 0,
+};
+
+/**
  * How many of each item the resident has recycled, derived from the kg already
- * tracked in monthlyImpact.wasteSources.
+ * tracked in monthlyImpact.wasteSources, plus the demo grant above.
  */
 export function earnedMaterials(): MaterialTally {
   const kgBySource = new Map(
@@ -173,7 +194,8 @@ export function earnedMaterials(): MaterialTally {
   const tally = emptyTally();
   for (const material of MATERIALS) {
     const kg = kgBySource.get(material.sourceId) ?? 0;
-    tally[material.id] = Math.floor(kg / material.unitKg);
+    tally[material.id] =
+      Math.floor(kg / material.unitKg) + DEMO_MATERIAL_GRANT[material.id];
   }
   return tally;
 }
