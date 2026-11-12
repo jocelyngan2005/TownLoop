@@ -1,13 +1,20 @@
+"use client";
+
 import type { LevelSummary } from "@/lib/home-data";
+import { usePoints } from "@/lib/points-store";
 
 export function LevelPointsCard({ level }: { level: LevelSummary }) {
+  // Live values from the store; `level` still supplies the tier names and
+  // thresholds, which are static.
+  const { balance, lifetimePoints } = usePoints();
+
   const span = level.nextLevelAt - level.levelStartsAt;
-  const earnedInLevel = level.lifetimePoints - level.levelStartsAt;
+  const earnedInLevel = lifetimePoints - level.levelStartsAt;
   const percent = Math.max(
     0,
     Math.min(100, Math.round((earnedInLevel / span) * 100)),
   );
-  const pointsToNextLevel = Math.max(0, level.nextLevelAt - level.lifetimePoints);
+  const pointsToNextLevel = Math.max(0, level.nextLevelAt - lifetimePoints);
 
   return (
     <section className="px-5">
@@ -18,8 +25,8 @@ export function LevelPointsCard({ level }: { level: LevelSummary }) {
               Level {level.level}
             </p>
             <p className="text-xl font-semibold text-white">{level.levelName}</p>
-            <p className="mt-3 text-3xl font-bold text-white">
-              {level.redeemablePoints.toLocaleString()}
+            <p aria-live="polite" className="mt-3 text-3xl font-bold text-white tabular-nums">
+              {balance.toLocaleString()}
               <span className="ml-1 text-sm font-medium text-leaf-300">pts</span>
             </p>
           </div>

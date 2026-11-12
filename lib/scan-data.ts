@@ -1,18 +1,37 @@
-export type BinId =
-  | "paper"
-  | "plastics"
-  | "glass"
-  | "metals"
-  | "organic"
-  | "e-waste"
-  | "textiles"
-  | "residual";
+/**
+ * Single source of truth for the bin streams. The arrays come first so the
+ * Gemini response schema can use them as enums without the enum and the
+ * TypeScript union ever drifting apart.
+ */
+export const binIds = [
+  "paper",
+  "plastics",
+  "glass",
+  "metals",
+  "organic",
+  "e-waste",
+  "textiles",
+  "residual",
+] as const;
 
-export type Verdict =
-  | "recyclable"
-  | "prep-required"
-  | "special"
-  | "not-recyclable";
+export const verdictValues = [
+  "recyclable",
+  "prep-required",
+  "special",
+  "not-recyclable",
+] as const;
+
+export type BinId = (typeof binIds)[number];
+
+export type Verdict = (typeof verdictValues)[number];
+
+export function isBinId(value: unknown): value is BinId {
+  return binIds.includes(value as BinId);
+}
+
+export function isVerdict(value: unknown): value is Verdict {
+  return verdictValues.includes(value as Verdict);
+}
 
 export type ScanItem = {
   id: string;
@@ -141,6 +160,37 @@ export const recyclingBins: RecyclingBin[] = [
   },
 ];
 
+/**
+ * Rewards are decided here, never by the model, so the same item always scores
+ * the same and the prompt cannot be talked into a bigger payout.
+ *
+ * The table is per-stream, so every item in a given bin earns the same base.
+ * The hand-written `points` on `scanItems` below predate this table and are
+ * left as they are — those entries are only used for the offline fallback.
+ */
+const binBasePoints: Record<BinId, number> = {
+  paper: 12,
+  plastics: 10,
+  glass: 14,
+  metals: 16,
+  organic: 8,
+  "e-waste": 40,
+  textiles: 20,
+  residual: 0,
+};
+
+/** Items needing a rinse or dismantling earn less; general waste earns nothing. */
+const verdictPointScale: Record<Verdict, number> = {
+  recyclable: 1,
+  "prep-required": 0.75,
+  special: 1,
+  "not-recyclable": 0,
+};
+
+export function awardPoints(binId: BinId, verdict: Verdict): number {
+  return Math.round(binBasePoints[binId] * verdictPointScale[verdict]);
+}
+
 export const scanItems: ScanItem[] = [
   {
     id: "cardboard-box",
@@ -229,6 +279,20 @@ export function findBinByCode(rawCode: string) {
 export type ItemMatch = {
   item: ScanItem;
   confidence: number;
+};
+
+/**
+ * Contract for `POST /api/scan/identify`, shared by the route and the scanner.
+ * It lives here rather than in the route file so the client never imports from
+ * a module that pulls in the Gemini SDK.
+ *
+ * `source: "fallback"` means no photo match was made — the UI has to say so
+ * instead of presenting an offline guess as an identification.
+ */
+export type IdentifyResponse = ItemMatch & {
+  source: "gemini" | "fallback";
+  /** Why the fallback was used. Not shown in the UI; visible in the network tab. */
+  reason?: "no-api-key" | "not-recognised" | "model-error";
 };
 
 /** Returns items in scanItems order; frame color only affects confidence. */

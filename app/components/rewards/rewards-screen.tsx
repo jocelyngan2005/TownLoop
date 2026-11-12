@@ -7,45 +7,32 @@ import { CheckIcon, CloseIcon, CoinIcon } from "@/app/components/icons";
 import { PointsBalanceCard } from "@/app/components/rewards/points-balance";
 import { RewardCard } from "@/app/components/rewards/reward-card";
 import { VoucherCard } from "@/app/components/rewards/voucher-card";
+import { redeemReward, usePoints } from "@/lib/points-store";
 import {
   rewardCategories,
   type Reward,
   type RewardCategory,
   type RewardsSummary,
-  type Voucher,
 } from "@/lib/rewards-data";
 
-function createVoucherCode(partner: string) {
-  const prefix = partner.replace(/[^a-z]/gi, "").slice(0, 4).toUpperCase();
-  const suffix = Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `${prefix}-${suffix}`;
-}
-
-function formatExpiry(validityDays: number) {
-  const date = new Date(Date.now() + validityDays * 24 * 60 * 60 * 1000);
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-}
-
 export function RewardsScreen({
-  initialPoints,
   rewards,
-  initialVouchers,
   summary,
   townshipPanel,
 }: {
-  initialPoints: number;
   rewards: Reward[];
-  initialVouchers: Voucher[];
   summary: RewardsSummary;
   /** Rank-gated township perks, rendered in their own tab. */
   townshipPanel?: ReactNode;
 }) {
-  const [points, setPoints] = useState(initialPoints);
-  const [vouchers, setVouchers] = useState(initialVouchers);
+  // Balance and vouchers come from the shared store, so points earned in the
+  // scanner are spendable here and a redemption survives navigating away.
+  const {
+    balance: points,
+    vouchers,
+    expiringPoints,
+    redeemedThisYear,
+  } = usePoints();
   const [tab, setTab] = useState<"catalog" | "township" | "vouchers">(
     "catalog",
   );
@@ -79,20 +66,11 @@ export function RewardsScreen({
   ).length;
 
   function confirmRedeem(reward: Reward) {
-    if (points < reward.costPoints) return;
+    // The store deducts the points and issues the voucher, or returns null if
+    // the balance moved below the cost in the meantime.
+    const voucher = redeemReward(reward);
+    if (!voucher) return;
 
-    const voucher: Voucher = {
-      id: `${reward.id}-${Date.now()}`,
-      partner: reward.partner,
-      title: reward.title,
-      value: reward.value,
-      code: createVoucherCode(reward.partner),
-      status: "active",
-      expiresOn: formatExpiry(reward.validityDays),
-    };
-
-    setPoints((current) => current - reward.costPoints);
-    setVouchers((current) => [voucher, ...current]);
     setNewVoucherId(voucher.id);
     setPendingReward(null);
     setTab("vouchers");
@@ -103,7 +81,9 @@ export function RewardsScreen({
       <PointsBalanceCard
         points={points}
         activeVouchers={activeVouchers}
-        summary={summary}
+        expiringPoints={expiringPoints}
+        expiryLabel={summary.expiryLabel}
+        redeemedThisYear={redeemedThisYear}
       />
 
       <div className="px-5">

@@ -7,14 +7,11 @@ import { CloseIcon } from "@/app/components/icons";
 import { CatalogDrawer } from "@/app/components/home/house/catalog-drawer";
 import { GardenBackdrop } from "@/app/components/home/house/garden-backdrop";
 import { RoomCanvas } from "@/app/components/home/house/room-canvas";
-import {
-  ROOM_H,
-  ROOM_W,
-  WALL_H,
-  snapPlacement,
-} from "@/app/components/home/house/room-geometry";
+import { RoomUnlockSheet } from "@/app/components/home/house/room-unlock-sheet";
+import { clampTile } from "@/app/components/home/house/room-geometry";
 import { useHouseLayout } from "@/app/components/home/house/use-house-layout";
-import { decorById } from "@/lib/decor-data";
+import { decorById, TILE, variantOf } from "@/lib/decor-data";
+import { lockedRooms as lockedRoomsFor, roomById } from "@/lib/house-plan";
 import type { LevelSummary } from "@/lib/home-data";
 
 export function HouseView({ level }: { level: LevelSummary }) {
@@ -69,28 +66,55 @@ function HouseDialog({
   const {
     placements,
     ownedOrStarter,
+    builtRooms,
     available,
     acquireAndPlace,
+    unlockRoom,
     move,
+    rotate,
     remove,
     resetRoom,
   } = useHouseLayout();
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
   const [catalogOpen, setCatalogOpen] = useState(false);
+  const [roomSheetId, setRoomSheetId] = useState<string | null>(null);
 
   const selected = placements.find((placement) => placement.key === selectedKey);
   const selectedItem = selected ? decorById.get(selected.itemId) : undefined;
+  const builtIds = builtRooms.map((room) => room.id);
+  const locked = lockedRoomsFor(builtIds);
+  const roomSheet = roomSheetId ? (roomById.get(roomSheetId) ?? null) : null;
 
   const placeFromCatalog = useCallback(
     (itemId: string) => {
       const item = decorById.get(itemId);
       if (!item) return;
-      // Drop it in the middle of its own layer; the resident drags from there.
-      const centreY = item.layer === "wall" ? WALL_H / 2 : (WALL_H + ROOM_H) / 2;
-      const { tx, ty } = snapPlacement(item, (ROOM_W - item.w) / 2, centreY - item.h / 2);
+      // Sized from the view it will be placed in, which is always the first.
+      const view = variantOf(item, 0);
+      // Drop it into the middle of the biggest room the resident has, on its
+      // own layer — somewhere they can see it, and drag from there.
+      const room = builtRooms.reduce((best, candidate) =>
+        candidate.cols * candidate.rows > best.cols * best.rows ? candidate : best,
+      );
+      const roomH = room.rows * TILE;
+      const wallH = room.wallRows * TILE;
+      const centreY = item.layer === "wall" ? wallH / 2 : (wallH + roomH) / 2;
+      const { tx, ty } = clampTile(
+        { ...view, layer: item.layer },
+        room,
+        (room.tx * TILE + (room.cols * TILE - view.w) / 2) / TILE,
+        (room.ty * TILE + centreY - view.h / 2) / TILE,
+      );
       if (acquireAndPlace(itemId, tx, ty)) setCatalogOpen(false);
     },
-    [acquireAndPlace],
+    [acquireAndPlace, builtRooms],
+  );
+
+  const buildRoom = useCallback(
+    (roomId: string) => {
+      if (unlockRoom(roomId)) setRoomSheetId(null);
+    },
+    [unlockRoom],
   );
 
   return (
@@ -104,7 +128,10 @@ function HouseDialog({
       <GardenBackdrop />
 
       <div className="relative flex items-start justify-between gap-4 px-6 py-5">
-        <div>
+        {/* The garden is bright enough that white text on it falls to about
+            2:1 contrast, so the heading carries its own backing rather than
+            darkening the whole garden behind it. */}
+        <div className="rounded-2xl bg-leaf-900/70 px-3 py-2 backdrop-blur-sm">
           <p className="text-xs font-medium uppercase tracking-wide text-leaf-300">
             Your home
           </p>
@@ -122,18 +149,23 @@ function HouseDialog({
         </button>
       </div>
 
-      <div className="relative flex flex-1 flex-col justify-center px-4">
+      <div className="relative flex min-h-0 flex-1 flex-col justify-center px-4">
         <RoomCanvas
+          rooms={builtRooms}
+          lockedRooms={locked}
           placements={placements}
           selectedKey={selectedKey}
           onSelect={setSelectedKey}
+          onSelectRoom={setRoomSheetId}
           onMove={move}
+          onRotate={rotate}
+          onRemove={remove}
         />
 
-        <p className="mx-auto mt-3 max-w-xs text-center text-[11px] leading-snug text-white/90 [text-shadow:0_1px_3px_rgba(16,40,29,0.9)]">
+        <p className="mx-auto mt-3 max-w-xs shrink-0 rounded-full bg-leaf-900/65 px-3 py-1.5 text-center text-[11px] leading-snug text-white/95 backdrop-blur-sm">
           {selectedItem
-            ? `${selectedItem.name} selected — drag it, nudge it with the arrow keys, or remove it.`
-            : "Drag anything to rearrange it. Recycle more to exchange for new pieces."}
+            ? `${selectedItem.name} selected — drag it, nudge it with the arrow keys, or use the buttons on it.`
+            : "Drag anything to rearrange it. Tap a dashed room to build it."}
         </p>
       </div>
 
@@ -147,39 +179,36 @@ function HouseDialog({
             Materials workshop
           </button>
 
-          {selected ? (
-            <button
-              type="button"
-              onClick={() => {
-                remove(selected.key);
-                setSelectedKey(null);
-              }}
-              className="rounded-full bg-clay-500 px-4 py-3 text-sm font-semibold text-white transition active:scale-95"
-            >
-              Remove
-            </button>
-          ) : (
-            <button
-              type="button"
-              onClick={() => {
-                resetRoom();
-                setSelectedKey(null);
-              }}
-              className="rounded-full bg-leaf-900/70 px-4 py-3 text-sm font-semibold text-leaf-100 backdrop-blur transition active:scale-95"
-            >
-              Tidy up
-            </button>
-          )}
+          {/* Turn and Remove live on the selected piece itself now, so the
+              footer keeps one pair of actions whatever is selected. */}
+          <button
+            type="button"
+            onClick={() => {
+              resetRoom();
+              setSelectedKey(null);
+            }}
+            className="rounded-full bg-leaf-900/70 px-4 py-3 text-sm font-semibold text-leaf-100 backdrop-blur transition active:scale-95"
+          >
+            Tidy up
+          </button>
         </div>
       </div>
 
-      {/* Sibling of the layout column so it anchors to the dialog, not the footer. */}
+      {/* Siblings of the layout column so they anchor to the dialog, not the
+          footer. Only one can be open: tapping a room closes the workshop. */}
       <CatalogDrawer
-        open={catalogOpen}
+        open={catalogOpen && !roomSheet}
         available={available}
         ownedOrStarter={ownedOrStarter}
         onPlace={placeFromCatalog}
         onClose={() => setCatalogOpen(false)}
+      />
+
+      <RoomUnlockSheet
+        room={roomSheet}
+        available={available}
+        onBuild={buildRoom}
+        onClose={() => setRoomSheetId(null)}
       />
     </div>
   );

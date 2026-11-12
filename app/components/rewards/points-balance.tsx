@@ -1,14 +1,21 @@
 import { CoinIcon, TicketIcon } from "@/app/components/icons";
-import type { RewardsSummary } from "@/lib/rewards-data";
 
+/**
+ * Presentational. Every figure is passed in so the caller can source the live
+ * ones from the points store and keep only the date label static.
+ */
 export function PointsBalanceCard({
   points,
   activeVouchers,
-  summary,
+  expiringPoints,
+  expiryLabel,
+  redeemedThisYear,
 }: {
   points: number;
   activeVouchers: number;
-  summary: RewardsSummary;
+  expiringPoints: number;
+  expiryLabel: string;
+  redeemedThisYear: number;
 }) {
   return (
     <section className="px-5">
@@ -36,7 +43,10 @@ export function PointsBalanceCard({
             <dt className="text-[10px] leading-tight text-leaf-200/80">
               Active vouchers
             </dt>
-            <dd className="mt-0.5 text-base font-semibold text-white">
+            <dd
+              aria-live="polite"
+              className="mt-0.5 text-base font-semibold text-white tabular-nums"
+            >
               {activeVouchers}
             </dd>
           </div>
@@ -44,15 +54,20 @@ export function PointsBalanceCard({
             <dt className="text-[10px] leading-tight text-leaf-200/80">
               Redeemed in 2026
             </dt>
-            <dd className="mt-0.5 text-base font-semibold text-white">
-              {summary.redeemedThisYear}
+            <dd
+              aria-live="polite"
+              className="mt-0.5 text-base font-semibold text-white tabular-nums"
+            >
+              {redeemedThisYear}
             </dd>
           </div>
         </dl>
 
         <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-sun-300/20 px-3 py-1.5 text-[11px] font-medium text-sun-300">
           <TicketIcon className="h-4 w-4" />
-          {summary.pointsExpiringSoon} pts expire on {summary.expiryLabel}
+          {expiringPoints > 0
+            ? `${expiringPoints.toLocaleString()} pts expire on ${expiryLabel}`
+            : `No points expiring on ${expiryLabel}`}
         </p>
       </div>
     </section>

@@ -6,13 +6,19 @@ import {
   CoinIcon,
   ScanIcon,
 } from "@/app/components/icons";
-import { getBin, type RecyclingBin, type ScanItem } from "@/lib/scan-data";
+import { NearestDropOffLine } from "@/app/components/scan/nearest-drop-off";
+import type { DisposalReceipt } from "@/lib/points-store";
+import { getBin, type BinId, type RecyclingBin } from "@/lib/scan-data";
 
 export type BinCheckIn = {
   bin: RecyclingBin;
-  item: ScanItem | null;
+  receipt: DisposalReceipt;
+  /**
+   * "matched" — at least one carried item belonged here and was dropped off.
+   * "mismatch" — carrying items, but none belong in this bin.
+   * "no-item" — nothing was being carried.
+   */
   outcome: "matched" | "mismatch" | "no-item";
-  awardedPoints: number;
 };
 
 export function BinCheckIn({
@@ -24,8 +30,13 @@ export function BinCheckIn({
   onScanItem: () => void;
   onDone: () => void;
 }) {
-  const { bin, item, outcome, awardedPoints } = checkIn;
-  const correctBin = item ? getBin(item.binId) : null;
+  const { bin, receipt, outcome } = checkIn;
+  const { disposed, remaining, itemPoints, bonus, total } = receipt;
+
+  // One hint per stream, not per item, so two cans do not repeat the address.
+  const remainingBinIds = [
+    ...new Set(remaining.map((entry) => entry.item.binId)),
+  ] as BinId[];
 
   return (
     <section aria-live="polite">
@@ -54,39 +65,104 @@ export function BinCheckIn({
         </div>
       </div>
 
-      {outcome === "matched" && item && (
+      {outcome === "matched" && (
         <div className="mt-4 rounded-2xl bg-leaf-50 p-3">
           <p className="text-sm font-semibold text-leaf-900">
-            {awardedPoints > 0
-              ? `${item.name} belongs here`
-              : `${item.name} is correct for this bin`}
+            {disposed.length === 1
+              ? `${disposed[0].item.name} dropped off`
+              : `${disposed.length} items dropped off`}
           </p>
-          <p className="mt-1 text-xs leading-relaxed text-leaf-700/85">
-            {awardedPoints > 0
-              ? "Drop it in — the sorting is logged against your streak."
-              : "No points for general waste, but keeping it out of recycling protects the batch."}
-          </p>
-          {awardedPoints > 0 && (
-            <p className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-white px-3 py-1.5 text-xs font-semibold text-leaf-900 ring-1 ring-leaf-100">
-              <CoinIcon className="h-4 w-4 text-sun-400" />+{awardedPoints} pts
-              added
+
+          <ul className="mt-2 space-y-1">
+            {disposed.map((entry) => (
+              <li
+                key={entry.uid}
+                className="flex items-center justify-between gap-3 text-xs text-leaf-800"
+              >
+                <span className="truncate">{entry.item.name}</span>
+                <span className="shrink-0 tabular-nums text-leaf-700/75">
+                  {entry.item.points > 0 ? `+${entry.item.points}` : "0"} pts
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <dl className="mt-3 space-y-1 border-t border-leaf-200 pt-2 text-xs text-leaf-800">
+            <div className="flex items-center justify-between gap-3">
+              <dt>Items</dt>
+              <dd className="font-medium tabular-nums">+{itemPoints} pts</dd>
+            </div>
+            {bonus > 0 && (
+              <div className="flex items-center justify-between gap-3">
+                <dt>Clean sorting bonus</dt>
+                <dd className="font-medium tabular-nums text-leaf-700">
+                  +{bonus} pts
+                </dd>
+              </div>
+            )}
+            <div className="flex items-center justify-between gap-3 border-t border-leaf-200 pt-1.5">
+              <dt className="font-semibold text-leaf-900">Added to balance</dt>
+              <dd className="inline-flex items-center gap-1.5 font-semibold text-leaf-900 tabular-nums">
+                <CoinIcon className="h-4 w-4 text-sun-400" />+{total} pts
+              </dd>
+            </div>
+          </dl>
+
+          {remaining.length > 0 && (
+            <p className="mt-3 text-[11px] leading-relaxed text-leaf-700/85">
+              Still carrying {remaining.length}{" "}
+              {remaining.length === 1 ? "item" : "items"} for another bin:{" "}
+              <span className="font-semibold text-leaf-900">
+                {[
+                  ...new Set(
+                    remaining.map((entry) => getBin(entry.item.binId).label),
+                  ),
+                ].join(", ")}
+              </span>
+              .
             </p>
+          )}
+
+          {remaining.length > 0 && (
+            <div className="mt-2 space-y-1.5">
+              {remainingBinIds.map((binId) => (
+                <NearestDropOffLine key={binId} binId={binId} />
+              ))}
+            </div>
           )}
         </div>
       )}
 
-      {outcome === "mismatch" && item && correctBin && (
+      {outcome === "mismatch" && (
         <div className="mt-4 rounded-2xl bg-clay-500/10 p-3">
           <p className="text-sm font-semibold text-leaf-900">
-            Wrong bin for {item.name}
+            Wrong bin for what you are carrying
           </p>
           <p className="mt-1 text-xs leading-relaxed text-leaf-700/85">
-            This one belongs in{" "}
-            <span className="font-semibold text-leaf-900">
-              {correctBin.label}
-            </span>{" "}
-            at {correctBin.location}. Nothing was logged yet.
+            Nothing was logged. These need a different bin:
           </p>
+          <ul className="mt-2 space-y-1">
+            {remaining.map((entry) => (
+              <li
+                key={entry.uid}
+                className="flex items-start justify-between gap-3 text-xs text-leaf-800"
+              >
+                <span className="truncate font-medium">{entry.item.name}</span>
+                <span className="shrink-0 text-right text-[11px] text-leaf-700/80">
+                  {getBin(entry.item.binId).label}
+                </span>
+              </li>
+            ))}
+          </ul>
+
+          <div className="mt-3 space-y-1.5 border-t border-clay-500/20 pt-2">
+            <p className="text-[11px] font-semibold text-leaf-900">
+              Take them here instead
+            </p>
+            {remainingBinIds.map((binId) => (
+              <NearestDropOffLine key={binId} binId={binId} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -96,8 +172,9 @@ export function BinCheckIn({
             Bin recognised — nothing scanned yet
           </p>
           <p className="mt-1 text-xs leading-relaxed text-leaf-700/85">
-            Scan the item you are holding to confirm it belongs in this bin and
-            to collect the points.
+            Scan the items you are holding first. They stay on your list until
+            you check in at the right bin, and a full drop-off earns a clean
+            sorting bonus.
           </p>
         </div>
       )}

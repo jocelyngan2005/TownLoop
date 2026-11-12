@@ -13,49 +13,122 @@ import { blank, crop, decodePNG, encodePNG, paste, scale } from "./lib/png.mjs";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 
-// [id, name, category, x, y, w, h]
+/**
+ * Interiors catalogue: one entry per *object*, listing every view of it drawn
+ * on the sheet.
+ *
+ * Several pieces are drawn four times, once per facing. Those are one entry
+ * with four variants rather than four entries, so the workshop lists "Armchair"
+ * once and the resident turns it in the room. Variant order is the turn order —
+ * front, right, back, left — so a rotate control can just step the index.
+ *
+ * Every rectangle here was measured off the alpha channel of the sheet (column
+ * and row runs through each band), not eyeballed: together they cover every
+ * opaque pixel on interiors_demo.png exactly once, with no overlaps. Objects
+ * on this sheet are NOT tile-aligned — the armchair is 28x30 at 130,2 — so
+ * these are pixel rects, not tile rects.
+ *
+ * Shape: { id, name, category, variants: [[facing, x, y, w, h], ...] }
+ */
 const CATALOG = [
   // --- surfaces -----------------------------------------------------------
-  ["wall-stone", "Stone Wall", "wall", 48, 0, 48, 48],
-  ["wall-drape-blue", "Blue Drape", "wall", 0, 0, 48, 48],
-  ["floor-concrete", "Concrete Floor", "floor", 96, 32, 15, 16],
-  ["floor-wood", "Wood Floor", "floor", 112, 32, 16, 16],
-  ["window", "Window", "wall", 103, 9, 18, 18],
+  // Tiled as the room's wall and floor rather than placed; see room-canvas.
+  { id: "wall-stone", name: "Stone Wall", category: "wall", variants: [["front", 48, 0, 48, 48]] },
+  { id: "wall-drape-blue", name: "Blue Drape", category: "wall", variants: [["front", 0, 0, 48, 48]] },
+  { id: "floor-concrete", name: "Concrete Floor", category: "floor", variants: [["front", 96, 32, 16, 16]] },
+  { id: "floor-wood", name: "Wood Floor", category: "floor", variants: [["front", 112, 32, 16, 16]] },
+
+  // --- wall-mounted -------------------------------------------------------
+  { id: "window", name: "Window", category: "wall", variants: [["front", 103, 9, 18, 18]] },
+  { id: "curtains-red", name: "Red Curtains", category: "wall", variants: [["front", 196, 103, 24, 25]] },
+  { id: "picture-portrait", name: "Framed Portrait", category: "wall", variants: [["front", 240, 145, 16, 14]] },
+  { id: "picture-group", name: "Framed Photo", category: "wall", variants: [["front", 240, 161, 16, 14]] },
 
   // --- seating ------------------------------------------------------------
-  ["armchair-front", "Armchair", "seating", 130, 2, 28, 30],
-  ["armchair-left", "Armchair (Left)", "seating", 161, 0, 23, 32],
-  ["armchair-back", "Armchair (Back)", "seating", 194, 7, 28, 25],
-  ["armchair-right", "Armchair (Right)", "seating", 232, 0, 23, 32],
-  ["armchair-wing", "Wing Armchair", "seating", 48, 128, 32, 48],
-  ["sofa-red", "Red Sofa", "seating", 0, 130, 47, 30],
-  ["sofa-red-low", "Low Sofa", "seating", 80, 135, 47, 25],
-  ["chair-dining", "Dining Chair", "seating", 129, 97, 18, 31],
-  ["chair-dining-alt", "Slatted Chair", "seating", 161, 97, 16, 31],
+  {
+    id: "armchair",
+    name: "Armchair",
+    category: "seating",
+    variants: [
+      ["front", 130, 2, 28, 30],
+      ["right", 161, 0, 23, 32],
+      ["back", 194, 7, 28, 25],
+      ["left", 232, 0, 23, 32],
+    ],
+  },
+  {
+    // The old "low sofa" is this sofa's back, and the two tall 23x48 pieces
+    // are its sides — mirror images of each other, which is what gives the
+    // set away. Same front/back height relationship as the armchair.
+    id: "sofa-red",
+    name: "Red Sofa",
+    category: "seating",
+    variants: [
+      ["front", 0, 130, 47, 30],
+      ["right", 49, 128, 23, 48],
+      ["back", 80, 135, 47, 25],
+      ["left", 136, 128, 23, 48],
+    ],
+  },
+  {
+    // Exactly one 16px column each: 128..144, 144..160, 160..176, 176..192.
+    id: "chair-dining",
+    name: "Dining Chair",
+    category: "seating",
+    variants: [
+      ["front", 128, 97, 16, 31],
+      ["right", 144, 97, 16, 31],
+      ["back", 160, 97, 16, 31],
+      ["left", 176, 97, 16, 31],
+    ],
+  },
+  { id: "stool", name: "Wooden Stool", category: "seating", variants: [["front", 145, 64, 14, 16]] },
 
   // --- bedroom ------------------------------------------------------------
-  ["bed-blue", "Blue Bed", "bedroom", 177, 37, 46, 59],
-  ["bed-green", "Green Bed", "bedroom", 225, 37, 30, 59],
-  ["bedside-set", "Bedside Set", "bedroom", 144, 44, 32, 36],
-  ["cabinet", "Cabinet", "bedroom", 116, 58, 24, 22],
+  { id: "bed-blue", name: "Blue Bed", category: "bedroom", variants: [["front", 177, 37, 46, 59]] },
+  { id: "bed-green", name: "Green Bed", category: "bedroom", variants: [["front", 225, 37, 30, 59]] },
+  {
+    id: "bedside-table",
+    name: "Bedside Table",
+    category: "bedroom",
+    variants: [
+      ["front", 144, 44, 16, 20],
+      ["back", 160, 44, 16, 20],
+    ],
+  },
+  { id: "cabinet", name: "Cabinet", category: "bedroom", variants: [["front", 116, 58, 24, 22]] },
 
   // --- tables & storage ---------------------------------------------------
-  ["table-long", "Long Table", "table", 0, 58, 72, 24],
-  ["table-wood", "Wooden Table", "table", 201, 136, 40, 40],
-  ["bookshelf", "Bookshelf", "table", 168, 128, 26, 48],
+  { id: "table-long", name: "Long Table", category: "table", variants: [["front", 0, 58, 64, 22]] },
+  { id: "table-wood", name: "Wooden Table", category: "table", variants: [["front", 192, 137, 48, 39]] },
+  { id: "bookshelf", name: "Bookshelf", category: "table", variants: [["front", 160, 128, 32, 44]] },
 
-  // --- decor --------------------------------------------------------------
-  ["rug-red", "Red Carpet", "rug", 81, 81, 46, 46],
-  ["rug-blue", "Blue Rug", "rug", 80, 53, 32, 22],
-  ["mirror-tall", "Tall Mirror", "decor", 10, 90, 28, 38],
-  ["curtains-red", "Red Curtains", "decor", 196, 103, 24, 25],
-  ["plant-tall", "Tall Houseplant", "plant", 224, 97, 16, 31],
-  ["flowerpot-pink", "Pink Flowerpot", "plant", 242, 114, 10, 14],
-  ["succulent", "Succulent", "plant", 242, 130, 11, 14],
-  ["watering-can", "Watering Can", "decor", 244, 99, 9, 9],
-  ["books-blue", "Stack of Books", "decor", 114, 164, 11, 11],
-  ["book-open", "Open Book", "decor", 98, 166, 13, 9],
+  // --- rugs ---------------------------------------------------------------
+  { id: "rug-red", name: "Red Carpet", category: "rug", variants: [["front", 81, 81, 46, 46]] },
+  { id: "rug-blue", name: "Blue Rug", category: "rug", variants: [["front", 80, 53, 32, 22]] },
+
+  // --- plants & decor -----------------------------------------------------
+  { id: "plant-tall", name: "Tall Houseplant", category: "plant", variants: [["front", 224, 97, 16, 31]] },
+  { id: "flowerpot-pink", name: "Pink Flowerpot", category: "plant", variants: [["front", 242, 114, 10, 14]] },
+  { id: "succulent", name: "Succulent", category: "plant", variants: [["front", 242, 130, 11, 14]] },
+  { id: "watering-can", name: "Watering Can", category: "decor", variants: [["front", 244, 99, 9, 9]] },
+  { id: "books-blue", name: "Stack of Books", category: "decor", variants: [["front", 114, 164, 11, 11]] },
+  { id: "book-open", name: "Open Book", category: "decor", variants: [["front", 98, 166, 13, 9]] },
 ];
+
+/**
+ * The wooden lining that surrounds a room, nine-sliced out of the sheet.
+ *
+ * Three rooms are outlined on the sheet (10,90 28x38; 48,80 32x16, open at the
+ * top; 48,106 32x22). All three use the same 6px border: a dark outer rule, a
+ * flat brown fill and a highlight pixel in each corner. The closed 32x22 one is
+ * the slice source because it is the only one with all four sides.
+ *
+ * Each edge is constant along its length, so a 1px strip repeats to any size
+ * with no seam — which keeps the lining pixel-exact at every integer zoom,
+ * where a stretched border-image would not be.
+ */
+const LINING = { x: 48, y: 106, w: 32, h: 22, inset: 6 };
 
 // Outdoor scatter and trees for the garden backdrop, from the woods sheet.
 // The grass itself is a flat colour (the blob interiors are a single RGB
@@ -87,14 +160,38 @@ const GARDEN = [
 export const GRASS_LIGHT = "#59c135";
 export const GRASS_DARK = "#14a02e";
 
-function buildCatalog({ sheetPath, outDir, manifestPath, catalog, label }) {
+/**
+ * Accept both catalogue shapes.
+ *
+ * The garden sheet has one view per object, so its entries stay flat tuples;
+ * the interiors sheet needs a variant list. Normalising here means only this
+ * function knows about the difference, and `variants: false` keeps the garden
+ * manifest flat for the backdrops that read it.
+ */
+function normalise(entry) {
+  if (Array.isArray(entry)) {
+    const [id, name, category, x, y, w, h] = entry;
+    return { id, name, category, variants: [["front", x, y, w, h]], flat: true };
+  }
+  return { ...entry, flat: false };
+}
+
+function buildCatalog({ sheetPath, outDir, manifestPath, catalog, label, lining }) {
   const SHEET = path.join(ROOT, sheetPath);
   const OUT_DIR = path.join(ROOT, outDir);
 
   const img = decodePNG(SHEET);
   fs.mkdirSync(OUT_DIR, { recursive: true });
 
-  const items = catalog.map(([id, name, category, x, y, w, h]) => {
+  // Clear the previous cut first. Renaming or merging an entry would otherwise
+  // leave its old PNG behind, and a stale sprite that still loads is a much
+  // harder thing to notice than a missing one.
+  for (const entry of fs.readdirSync(OUT_DIR)) {
+    if (entry.endsWith(".png")) fs.rmSync(path.join(OUT_DIR, entry));
+  }
+
+  /** Cut one rect, write it out, and measure how well the rect fits it. */
+  function cutPiece(fileName, facing, x, y, w, h, id) {
     if (x < 0 || y < 0 || x + w > img.width || y + h > img.height) {
       throw new Error(`${id}: rect ${x},${y} ${w}x${h} falls outside the sheet`);
     }
@@ -102,18 +199,22 @@ function buildCatalog({ sheetPath, outDir, manifestPath, catalog, label }) {
 
     // Guard against a rect that missed its subject or clipped a neighbour.
     let opaque = 0;
-    let edge = 0;
     for (let py = 0; py < h; py += 1) {
       for (let px = 0; px < w; px += 1) {
-        if (piece.data[(py * w + px) * 4 + 3] <= 8) continue;
-        opaque += 1;
-        if (px === 0 || py === 0 || px === w - 1 || py === h - 1) edge += 1;
+        if (piece.data[(py * w + px) * 4 + 3] > 8) opaque += 1;
       }
     }
-    const coverage = opaque / (w * h);
 
-    fs.writeFileSync(path.join(OUT_DIR, `${id}.png`), encodePNG(piece));
-    return { id, name, category, x, y, w, h, coverage, edge };
+    fs.writeFileSync(path.join(OUT_DIR, `${fileName}.png`), encodePNG(piece));
+    return { facing, x, y, w, h, coverage: opaque / (w * h) };
+  }
+
+  const items = catalog.map(normalise).map((entry) => {
+    const variants = entry.variants.map(([facing, x, y, w, h], index) =>
+      // First variant keeps the bare id, so single-view ids are unchanged.
+      cutPiece(index === 0 ? entry.id : `${entry.id}-${facing}`, facing, x, y, w, h, entry.id),
+    );
+    return { ...entry, variants };
   });
 
   const manifest = {
@@ -121,44 +222,94 @@ function buildCatalog({ sheetPath, outDir, manifestPath, catalog, label }) {
     sheetWidth: img.width,
     sheetHeight: img.height,
     tile: 16,
-    // Only geometry ships to the app; coverage/edge are build-time checks.
-    items: items.map((i) => ({
-      id: i.id,
-      name: i.name,
-      category: i.category,
-      x: i.x,
-      y: i.y,
-      w: i.w,
-      h: i.h,
-    })),
+    // Only geometry ships to the app; coverage is a build-time check.
+    items: items.map((item) => {
+      const head = { id: item.id, name: item.name, category: item.category };
+      // A single-view sheet stays flat, with no facing to choose between.
+      if (item.flat) {
+        const { x, y, w, h } = item.variants[0];
+        return { ...head, x, y, w, h };
+      }
+      return {
+        ...head,
+        variants: item.variants.map(({ facing, x, y, w, h }) => ({ facing, x, y, w, h })),
+      };
+    }),
   };
+  if (lining) manifest.lining = buildLining(img, OUT_DIR, lining);
+
   fs.writeFileSync(
     path.join(ROOT, manifestPath),
     `${JSON.stringify(manifest, null, 2)}\n`,
   );
 
-  console.log(`${label}: ${items.length} items -> ${outDir}/`);
-  const suspect = items.filter((i) => i.coverage < 0.15);
+  const sprites = items.reduce((n, item) => n + item.variants.length, 0);
+  console.log(`${label}: ${items.length} entries, ${sprites} sprites -> ${outDir}/`);
+  const suspect = items.flatMap((item) =>
+    item.variants
+      .filter((variant) => variant.coverage < 0.15)
+      .map((variant) => `${item.id} (${variant.facing})  ${(variant.coverage * 100).toFixed(0)}%`),
+  );
   if (suspect.length) {
     console.log("  low fill (check framing):");
-    for (const i of suspect) {
-      console.log(`    ${i.id} ${(i.coverage * 100).toFixed(0)}%`);
-    }
+    for (const line of suspect) console.log(`    ${line}`);
   }
 
   return { img, items };
 }
 
+/**
+ * Cut the room lining into four corners and four 1px repeating edge strips.
+ *
+ * Taking the strips from the midpoint of each side avoids the corner
+ * highlights, and because every side is constant along its length one pixel
+ * is as good as the whole run.
+ */
+function buildLining(img, outDir, { x, y, w, h, inset }) {
+  const dir = path.join(outDir, "lining");
+  fs.mkdirSync(dir, { recursive: true });
+
+  const midX = x + (w >> 1);
+  const midY = y + (h >> 1);
+  const pieces = {
+    tl: [x, y, inset, inset],
+    tr: [x + w - inset, y, inset, inset],
+    bl: [x, y + h - inset, inset, inset],
+    br: [x + w - inset, y + h - inset, inset, inset],
+    top: [midX, y, 1, inset],
+    bottom: [midX, y + h - inset, 1, inset],
+    left: [x, midY, inset, 1],
+    right: [x + w - inset, midY, inset, 1],
+  };
+
+  for (const [name, rect] of Object.entries(pieces)) {
+    fs.writeFileSync(path.join(dir, `${name}.png`), encodePNG(crop(img, ...rect)));
+  }
+  console.log(`  lining: ${inset}px border -> ${path.relative(ROOT, dir)}/`);
+
+  // `rect` is for tooling that re-cuts from the sheet (scripts/preview-room);
+  // the app only ever loads the slices under `dir`.
+  return { inset, dir: `/${path.relative(path.join(ROOT, "public"), dir)}`, rect: { x, y, w, h } };
+}
+
+/**
+ * Contact sheet for eyeballing the cuts: one cell per variant, one row per
+ * entry, so a four-facing object reads as a row of four and a mis-cut shows up
+ * next to its siblings.
+ */
 function writeVerify(out, img, items) {
   const factor = 5;
-  const cell = Math.max(...items.map((i) => Math.max(i.w, i.h))) * factor + 10;
-  const cols = 8;
-  const rows = Math.ceil(items.length / cols);
-  const sheet = blank(cols * cell, rows * cell, [20, 20, 26, 255]);
+  const all = items.flatMap((item) => item.variants);
+  const cell = Math.max(...all.map((v) => Math.max(v.w, v.h))) * factor + 10;
+  const cols = Math.max(...items.map((item) => item.variants.length));
+  const cells = items.flatMap((item, row) =>
+    item.variants.map((variant, col) => ({ ...variant, row, col })),
+  );
+  const sheet = blank(cols * cell, items.length * cell, [20, 20, 26, 255]);
 
-  items.forEach((item, i) => {
-    const cx = (i % cols) * cell;
-    const cy = ((i / cols) | 0) * cell;
+  cells.forEach((item) => {
+    const cx = item.col * cell;
+    const cy = item.row * cell;
     for (let y = 0; y < cell - 2; y += 1) {
       for (let x = 0; x < cell - 2; x += 1) {
         const shade = ((x >> 3) + (y >> 3)) % 2 ? 60 : 46;
@@ -174,7 +325,7 @@ function writeVerify(out, img, items) {
   });
 
   fs.writeFileSync(out, encodePNG(sheet));
-  console.log(`  verify sheet: ${out} (${cols} per row)`);
+  console.log(`  verify sheet: ${out} (one row per entry, up to ${cols} views)`);
 }
 
 function main() {
@@ -188,6 +339,7 @@ function main() {
       manifestPath: "lib/decor-catalog.json",
       catalog: CATALOG,
       label: "decor",
+      lining: LINING,
     }),
     buildCatalog({
       sheetPath: "public/free_pixel_16_woods.png",

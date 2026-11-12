@@ -247,3 +247,23 @@ export function formatDistance(distanceKm: number) {
     ? `${Math.round(distanceKm * 1000)} m`
     : `${distanceKm.toFixed(1)} km`;
 }
+
+/**
+ * Every station that takes this stream, nearest first. Not every bin has one —
+ * `residual` has no drop-off point, so callers must handle an empty list.
+ */
+export function stationsAccepting(binId: BinId): DropOffStation[] {
+  return dropOffStations
+    .filter((station) => station.accepts.includes(binId))
+    .sort((a, b) => a.distanceKm - b.distanceKm);
+}
+
+export function nearestStationFor(binId: BinId): DropOffStation | undefined {
+  return stationsAccepting(binId)[0];
+}
+
+export function directionsHref(station: DropOffStation) {
+  return `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(
+    station.mapsQuery,
+  )}`;
+}

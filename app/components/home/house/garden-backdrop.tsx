@@ -33,10 +33,11 @@ const SCATTER_COUNT = 64;
  * The garden the pixel house sits in: flat grass from the woods sheet, with
  * scattered greenery and hand-placed trees around the edges.
  *
- * A dark scrim sits on top of the greenery — the grass is bright enough that
- * the dialog's white text would otherwise fall well below a readable contrast
- * ratio. The scrim is strongest at the top and bottom, where the header and
- * controls are, and clears in the middle so the room reads against grass.
+ * Nothing is laid over the greenery. The grass is bright enough that white
+ * text on it sits around 2:1 contrast, so the text that needs to be readable
+ * — the heading and the hint under the house — carries its own backing panel
+ * in house-view.tsx instead. Darkening the whole garden to fix two lines of
+ * copy cost far more than it bought.
  */
 export function GardenBackdrop() {
   const scatter = useMemo(() => {
@@ -105,8 +106,6 @@ export function GardenBackdrop() {
           />
         );
       })}
-
-      <div className="absolute inset-0 bg-gradient-to-b from-leaf-900/75 via-leaf-900/10 to-leaf-900/85" />
     </div>
   );
 }

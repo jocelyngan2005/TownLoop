@@ -13,16 +13,25 @@ import { CameraFrame } from "@/app/components/scan/camera-frame";
 import { ItemVerdict } from "@/app/components/scan/item-verdict";
 import { useCamera } from "@/app/components/scan/use-camera";
 import {
+  carryItem,
+  CLEAN_SORTING_BONUS,
+  discardCarried,
+  disposeAtBin,
+  usePoints,
+} from "@/lib/points-store";
+import {
   findBinByCode,
-  identifyFromFrame,
+  getBin,
   recyclingBins,
   scanItems,
+  type IdentifyResponse,
   type ItemMatch,
 } from "@/lib/scan-data";
 
 type Mode = "item" | "qr";
+type ScanSource = IdentifyResponse["source"];
 
-const demoItems = ["glass-bottle", "pet-bottle", "old-phone", "pizza-box"]
+const demoItems = ["cardboard-box", "old-phone", "battery", "cotton-shirt"]
   .map((id) => scanItems.find((item) => item.id === id))
   .filter((item): item is (typeof scanItems)[number] => Boolean(item));
 
@@ -38,14 +47,22 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   const [match, setMatch] = useState<ItemMatch | null>(null);
   const [checkIn, setCheckIn] = useState<BinCheckIn | null>(null);
   const [seenIds, setSeenIds] = useState<string[]>([]);
-  const [recordedItems, setRecordedItems] = useState<ItemMatch[]>([]);
   const [sessionPoints, setSessionPoints] = useState(0);
   const [manualCode, setManualCode] = useState("");
   const [codeError, setCodeError] = useState<string | null>(null);
+  const [scanSource, setScanSource] = useState<ScanSource>("gemini");
+  const [scanError, setScanError] = useState<string | null>(null);
+
+  // The carry list and the balance live in the store so they survive navigation.
+  const { carried } = usePoints();
+  const carriedPoints = carried.reduce(
+    (sum, entry) => sum + entry.item.points,
+    0,
+  );
 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const qrCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const analysisTimeout = useRef<number | null>(null);
+  const identifyAbort = useRef<AbortController | null>(null);
 
   // `/scan#qr` opens straight into bin check-in without a dynamic server read.
   const hash = useSyncExternalStore(
@@ -60,12 +77,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   const cameraReady = status === "ready";
   const cameraBlocked = status === "denied" || status === "unavailable";
 
-  useEffect(
-    () => () => {
-      if (analysisTimeout.current) window.clearTimeout(analysisTimeout.current);
-    },
-    [],
-  );
+  useEffect(() => () => identifyAbort.current?.abort(), []);
 
   const captureFrame = useCallback(() => {
     const video = videoRef.current;
@@ -115,26 +127,58 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
     };
   }, [videoRef]);
 
-  function identifyItem() {
+  async function identifyItem() {
     const frame = captureFrame();
     if (!frame) return;
 
+    identifyAbort.current?.abort();
+    const controller = new AbortController();
+    identifyAbort.current = controller;
+
     setCapturedImage(frame.dataUrl);
+    setScanError(null);
     setAnalysing(true);
 
-    analysisTimeout.current = window.setTimeout(() => {
-      const result = identifyFromFrame(frame.averageColor, seenIds);
-      setMatch(result);
+    try {
+      const response = await fetch("/api/scan/identify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          image: frame.dataUrl,
+          averageColor: frame.averageColor,
+          seenIds,
+        }),
+        signal: controller.signal,
+      });
+
+      if (!response.ok) throw new Error(`Identify failed: ${response.status}`);
+
+      const result = (await response.json()) as IdentifyResponse;
+      if (controller.signal.aborted) return;
+
+      setScanSource(result.source);
+      setMatch({ item: result.item, confidence: result.confidence });
       setSeenIds((current) => [...current, result.item.id]);
-      setAnalysing(false);
-    }, 1100);
+    } catch (error) {
+      // An abort is a mode switch or an unmount, not a failure to report.
+      if (controller.signal.aborted) return;
+
+      console.error(error);
+      setCapturedImage(null);
+      setScanError("Could not identify that item. Check your connection and try again.");
+    } finally {
+      if (!controller.signal.aborted) setAnalysing(false);
+    }
   }
 
   function simulateItem(itemId: string) {
     const item = scanItems.find((entry) => entry.id === itemId);
     if (!item) return;
 
+    identifyAbort.current?.abort();
     setCapturedImage(null);
+    setScanError(null);
+    setScanSource("fallback");
     setMatch({ item, confidence: 0.88 });
     setSeenIds((current) => [...current, item.id]);
   }
@@ -151,36 +195,26 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
       setCodeError(null);
       navigator.vibrate?.(40);
 
-      const item = match?.item ?? recordedItems.at(-1)?.item ?? null;
+      // Drops off every carried item that belongs in this bin, awards their
+      // points plus the clean-sorting bonus, and leaves the rest on the list.
+      const receipt = disposeAtBin(bin.id);
 
-      if (!item) {
-        setCheckIn({ bin, item: null, outcome: "no-item", awardedPoints: 0 });
-        return;
-      }
-
-      const isCorrectBin = item.binId === bin.id;
-      const awardedPoints = isCorrectBin ? item.points : 0;
-
-      if (awardedPoints > 0) {
-        setSessionPoints((current) => current + awardedPoints);
-        // The item is dropped off now, so it cannot be scored a second time.
+      if (receipt.disposed.length > 0) {
+        setSessionPoints((current) => current + receipt.total);
+        // Anything just dropped off must not be scored again.
         setMatch(null);
-        setRecordedItems((current) => {
-          const index = current.findIndex((entry) => entry.item.id === item.id);
-          return index < 0
-            ? current
-            : current.filter((_, entryIndex) => entryIndex !== index);
-        });
       }
 
-      setCheckIn({
-        bin,
-        item,
-        outcome: isCorrectBin ? "matched" : "mismatch",
-        awardedPoints,
-      });
+      const outcome =
+        receipt.disposed.length > 0
+          ? "matched"
+          : receipt.remaining.length > 0
+            ? "mismatch"
+            : "no-item";
+
+      setCheckIn({ bin, receipt, outcome });
     },
-    [match, recordedItems],
+    [],
   );
 
   useEffect(() => {
@@ -238,26 +272,34 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
   }, [mode, checkIn, cameraReady, registerCode, videoRef]);
 
   function switchMode(next: Mode) {
+    // Leaving item mode mid-analysis must not land a stale verdict later.
+    identifyAbort.current?.abort();
+    identifyAbort.current = null;
+
     setModeOverride(next);
     setCheckIn(null);
     setCodeError(null);
+    setAnalysing(false);
+    setScanError(null);
 
     if (next === "item") {
       setMatch(null);
       setCapturedImage(null);
-      setAnalysing(false);
     }
   }
 
   function resetItem() {
+    identifyAbort.current?.abort();
+    identifyAbort.current = null;
     setMatch(null);
     setCapturedImage(null);
     setAnalysing(false);
+    setScanError(null);
   }
 
   function recordMatch() {
     if (!match) return;
-    setRecordedItems((current) => [...current, match]);
+    carryItem(match);
   }
 
   return (
@@ -354,6 +396,7 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
               {match ? (
                 <ItemVerdict
                   match={match}
+                  source={scanSource}
                   onAddAndScan={() => {
                     recordMatch();
                     resetItem();
@@ -369,6 +412,15 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
                 />
               ) : (
                 <>
+                  {scanError && (
+                    <p
+                      role="alert"
+                      className="rounded-2xl bg-clay-500/10 px-3 py-2.5 text-xs font-medium leading-relaxed text-clay-600"
+                    >
+                      {scanError}
+                    </p>
+                  )}
+
                   <button
                     type="button"
                     onClick={identifyItem}
@@ -432,24 +484,46 @@ export function ScannerScreen({ initialMode = "item" }: { initialMode?: Mode }) 
                 />
               ) : (
                 <>
-                  {recordedItems.length > 0 && (
+                  {carried.length > 0 && (
                     <div className="rounded-2xl bg-leaf-50 px-3 py-2.5">
                       <p className="text-xs font-semibold text-leaf-900">
-                        Recorded items ({recordedItems.length})
+                        Carrying {carried.length}{" "}
+                        {carried.length === 1 ? "item" : "items"} ·{" "}
+                        {carriedPoints > 0
+                          ? `+${carriedPoints} pts waiting`
+                          : "no points waiting"}
                       </p>
                       <ul className="mt-2 space-y-1.5">
-                        {recordedItems.map(({ item }, index) => (
+                        {carried.map(({ uid, item }) => (
                           <li
-                            key={`${item.id}-${index}`}
-                            className="flex items-center justify-between gap-3 text-xs text-leaf-800"
+                            key={uid}
+                            className="flex items-center justify-between gap-2 text-xs text-leaf-800"
                           >
-                            <span className="truncate">{item.name}</span>
-                            <span className="shrink-0 text-[10px] text-leaf-700/65">
-                              {item.points > 0 ? `+${item.points} pts` : "No points"}
+                            <span className="min-w-0 flex-1 truncate">
+                              {item.name}
                             </span>
+                            <span className="shrink-0 text-[10px] text-leaf-700/65">
+                              {getBin(item.binId).label}
+                            </span>
+                            <span className="shrink-0 tabular-nums text-[10px] font-medium text-leaf-700/80">
+                              {item.points > 0 ? `+${item.points}` : "0"}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => discardCarried(uid)}
+                              aria-label={`Remove ${item.name} from your list`}
+                              className="grid h-5 w-5 shrink-0 place-items-center rounded-full bg-white text-leaf-700 ring-1 ring-leaf-200 transition active:scale-90"
+                            >
+                              <CloseIcon className="h-3 w-3" />
+                            </button>
                           </li>
                         ))}
                       </ul>
+                      <p className="mt-2 text-[10px] leading-relaxed text-leaf-700/65">
+                        These stay on your list until you check in at the
+                        matching bin. A full drop-off adds a{" "}
+                        {CLEAN_SORTING_BONUS} pt clean sorting bonus.
+                      </p>
                     </div>
                   )}
 

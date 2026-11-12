@@ -28,8 +28,11 @@ export type Voucher = {
 };
 
 export type RewardsSummary = {
+  /** Seed only — the live figure is `expiringPoints` in `lib/points-store.ts`. */
   pointsExpiringSoon: number;
+  /** Static label; nothing recalculates the date. */
   expiryLabel: string;
+  /** Seed only — the live figure is `redeemedThisYear` in `lib/points-store.ts`. */
   redeemedThisYear: number;
 };
 

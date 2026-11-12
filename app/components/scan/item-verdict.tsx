@@ -1,15 +1,19 @@
 "use client";
 
 import { CheckIcon, CoinIcon, QrCodeIcon } from "@/app/components/icons";
+import { NearestDropOff } from "@/app/components/scan/nearest-drop-off";
 import { getBin, verdictMeta, type ItemMatch } from "@/lib/scan-data";
 
 export function ItemVerdict({
   match,
+  source = "gemini",
   onAddAndScan,
   onRemove,
   onContinueToBin,
 }: {
   match: ItemMatch;
+  /** "fallback" means no photo match was made — say so rather than imply one. */
+  source?: "gemini" | "fallback";
   onAddAndScan: () => void;
   onRemove: () => void;
   onContinueToBin: () => void;
@@ -85,9 +89,20 @@ export function ItemVerdict({
         </p>
       )}
 
-      <p className="mt-3 text-[10px] text-leaf-700/60">
-        Identified with {Math.round(confidence * 100)}% confidence. Re-scan from
-        another angle if this looks wrong.
+      <NearestDropOff binId={item.binId} />
+
+      <p className="mt-3 text-[10px] leading-relaxed text-leaf-700/60">
+        {source === "fallback" ? (
+          <>
+            Offline estimate — the photo was not matched. Check the item against
+            the bin label before you drop it off.
+          </>
+        ) : (
+          <>
+            Identified with {Math.round(confidence * 100)}% confidence. Re-scan
+            from another angle if this looks wrong.
+          </>
+        )}
       </p>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
